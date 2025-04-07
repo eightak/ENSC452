@@ -1,0 +1,30 @@
+#ifndef SHARED_MEM_H
+#define SHARED_MEM_H
+
+#include <stdio.h>
+#include <string.h>
+#include "xil_printf.h"
+
+#include "xil_cache.h"
+
+#define SHARED_MEMORY_BASE_ADDR  0xFFFF0000
+#define SHARED_MEMORY ((shared_data_t *) SHARED_MEMORY_BASE_ADDR)
+
+
+
+typedef struct {
+	volatile int timerRunningFlag;
+    volatile int playTimerTickSoundFlag;
+    volatile int playTimerDoneSoundFlag;
+} shared_data_t;
+
+
+void setTimerRunningFlag_sharedMemory(int value);
+void setPlayTimerDoneFlag_sharedMemory(int value);
+void setPlayTimerTickFlag_sharedMemory(int value);
+
+int getTimerRunningFlag_sharedMemory();
+int getPlayTimerDoneFlag_sharedMemory();
+int getPlayTimerTickFlag_sharedMemory();
+
+#endif

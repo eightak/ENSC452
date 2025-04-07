@@ -1,0 +1,169 @@
+#include "timer.h"
+
+void AXITimerInit(){
+
+	XTmrCtr_Initialize(&m_AxiTimer, XPAR_TMRCTR_0_DEVICE_ID);
+
+	m_timerClockFreq = (double) XPAR_AXI_TIMER_0_CLOCK_FREQ_HZ;
+	m_ClockPeriodSeconds = (double)(1/m_timerClockFreq);
+
+	m_tickcounter1 = 0;
+	m_tickcounter2 = 0;
+}
+
+void resetTimer(){
+	m_tickcounter1 = 0;
+	m_tickcounter2 = 0;
+}
+
+unsigned int startTimer(){
+	XTmrCtr_Reset(&m_AxiTimer, 0);
+	m_tickcounter1 = XTmrCtr_GetValue(&m_AxiTimer, 0);
+	XTmrCtr_Start(&m_AxiTimer, 0);
+	return m_tickcounter1;
+}
+
+unsigned int stopTimer(){
+	XTmrCtr_Stop(&m_AxiTimer, 0);
+	m_tickcounter2 = XTmrCtr_GetValue(&m_AxiTimer, 0);
+	return ((m_tickcounter2 - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getElapsedTimerInSeconds(){
+	return ((double) (XTmrCtr_GetValue(&m_AxiTimer, 0) - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getElapsedTimerInSecondsAfterTimerStop(){
+	return ((double) (m_tickcounter2 - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getClockPeriod(){
+	return m_ClockPeriodSeconds;
+}
+
+
+void init_timer(int * background) {
+	if (sw1_rising_edge) {
+		xil_printf("init timer..\n");
+		//Disable clock
+		showTimeFlag = 0;
+
+		timeElapsedInSeconds = 0;
+		setTimerValueInSeconds = 0;
+		nextSecond = 0;
+		startTimerFlag = 0;
+
+		calculateTime(0);
+		chooseFontColour(550, 450, background);
+		//memcpy(image_buffer_pointer, left_image_pointer, NUM_BYTES_BUFFER);
+		write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+		displayImage(curr_image_ptr);
+		sw1_rising_edge = 0;
+	}
+
+	if (startTimerFlag == 1) {
+		timeElapsedInSeconds = (unsigned int)getElapsedTimerInSeconds();
+		calculateTime(setTimerValueInSeconds - timeElapsedInSeconds);
+		//write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+		//displayImage(curr_image_ptr);
+	}
+
+	if(timeElapsedInSeconds != nextSecond){
+		write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+		displayImage(curr_image_ptr);
+		//playTimerTickSound();
+		setPlayTimerTickFlag_sharedMemory(1);
+		nextSecond = timeElapsedInSeconds;
+	}
+
+	if((startTimerFlag == 1) && (timeElapsedInSeconds >= setTimerValueInSeconds)){
+		//xil_printf("TIMER DONE!!!\n");
+		write_string((char*)"TIMER DONE!", 500, 450, background, curr_image_ptr, 7);
+		displayImage(curr_image_ptr);
+		//playTimerDoneSound();
+		setPlayTimerTickFlag_sharedMemory(0);
+		setPlayTimerDoneFlag_sharedMemory(1);
+		//startTimerFlag = 0;
+		setTimerValueInSeconds = 0;
+		stopTimer();
+		resetTimer();
+	}
+	else if (startTimerFlag == 1) {
+		timeElapsedInSeconds = (unsigned int)getElapsedTimerInSeconds();
+		calculateTime(setTimerValueInSeconds - timeElapsedInSeconds);
+		//write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+		//displayImage(curr_image_ptr);
+	}
+
+	if (button_pressed_flag) {
+		switch (btn_value) {
+			case CENTRE_BUTTON: // start/pause
+				if ((startTimerFlag == 0) && (setTimerValueInSeconds >= 10)) {
+					xil_printf("starting timer...\n");
+					startTimer();
+					setTimerRunningFlag_sharedMemory(1);
+					timeElapsedInSeconds = 0;
+					startTimerFlag = 1;
+					xil_printf("Timer started for %d seconds\n", setTimerValueInSeconds);
+				}
+				else if (startTimerFlag == 1) {
+					xil_printf("stopping timer...\n");
+					//Stop Beep
+					setPlayTimerDoneFlag_sharedMemory(0);
+					setTimerRunningFlag_sharedMemory(0);
+					timeElapsedInSeconds = (unsigned int)stopTimer();
+					startTimerFlag = 0;
+					xil_printf("timeElapsedInSeconds = %d\n", timeElapsedInSeconds);
+				}
+				break;
+			case RIGHT_BUTTON: // Reset Timer
+				//Stop Beep
+				setPlayTimerDoneFlag_sharedMemory(0);
+				setTimerRunningFlag_sharedMemory(0);
+				resetTimer();
+				setTimerValueInSeconds = 0;
+				startTimerFlag = 0;
+				calculateTime(0);
+				write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+				displayImage(curr_image_ptr);
+				xil_printf("Timer reset...\n");
+				break;
+			case UP_BUTTON: //Increment 10 seconds
+				if (startTimerFlag == 0) {
+					setTimerValueInSeconds += 10;
+					xil_printf("Timer incremented = %d\n", setTimerValueInSeconds);
+
+					calculateTime(setTimerValueInSeconds);
+					write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+					displayImage(curr_image_ptr);
+				}
+				break;
+			case DOWN_BUTTON:
+				if ((startTimerFlag == 0) && (setTimerValueInSeconds >= 10)) {
+					setTimerValueInSeconds -= 10;
+					xil_printf("Timer decremented = %d\n", setTimerValueInSeconds);
+
+					calculateTime(setTimerValueInSeconds);
+					write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+					displayImage(curr_image_ptr);
+				}
+				break;
+		}
+	}
+	else if (switch_falling_edge) {
+		home_screen();
+		switch_falling_edge = 0;
+		setTimerRunningFlag_sharedMemory(0);
+		setPlayTimerTickFlag_sharedMemory(0);
+		setPlayTimerDoneFlag_sharedMemory(0);
+	}
+}
+
+void calculateTime(int total_seconds){
+
+	int minutes = (total_seconds % 3600) / 60;
+	int seconds = total_seconds % 60;
+
+	sprintf(timerChar, "%02d:%02d", minutes, seconds);
+
+}

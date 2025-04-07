@@ -1,0 +1,117 @@
+//Empty C++ Application
+#include <stdio.h>
+#include <string.h>
+#include "xil_types.h"
+#include "xparameters.h"
+#include "xgpio.h"
+#include "xil_io.h"
+#include "xil_exception.h"
+#include "xscugic.h"
+#include "xil_printf.h"
+//#include <cstdlib>
+#include "interrupts.h"
+#include "audio.h"
+//#include "display.h"
+
+#include "xil_cache.h"
+#include "shared_mem.h"
+
+int Setup();
+void MainLoop();
+void audioSS();
+void beep();
+
+int main() {
+
+	Setup();
+	MainLoop();
+
+	return 0;
+}
+
+
+int Setup() {
+	//Setup Audio
+	IicConfig(XPAR_XIICPS_0_DEVICE_ID);
+
+	//Configure the Audio Codec's PLL
+	AudioPllConfig();
+
+	AudioConfigureJacks();
+
+	gpio_init();
+
+	/*
+	int xStatus;
+	xStatus = XGpio_Initialize(&BTNInst, BTNS_DEVICE_ID);
+	if (xStatus != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	XGpio_SetDataDirection(&BTNInst, 1, 0xFF);
+	XGpio_SetDataDirection(&BTNInst, 2, 0xFF);
+
+	xStatus=ScuGicInterrupt_Init(XPAR_PS7_SCUGIC_0_DEVICE_ID,&BTNInst);
+	if(xStatus != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	btn_value = XGpio_DiscreteRead(&BTNInst, 1);
+	sw_value = XGpio_DiscreteRead(&BTNInst, 2);
+	sw2_bit = (sw_value >> 2) & 1;
+	*/
+
+	music_index = 0;
+
+	xil_printf("CPU1: Initialized\n");
+
+	return 0;
+
+}
+
+void MainLoop(){
+
+	while(1){
+
+		if (getVolumeControlFlag_sharedMemory() == 1) {
+			xil_printf("increasing volume\n");
+			increaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+		else if (getVolumeControlFlag_sharedMemory() == 2) {
+			xil_printf("decreasing volume\n");
+			decreaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+
+		if(getTimerRunningFlag_sharedMemory() && (getSW2Flag_sharedMemory() == 0)){
+			// Timer only
+			if (getPlayTimerTickFlag_sharedMemory()){
+				playTimerTickSound();
+				setPlayTimerTickFlag_sharedMemory(0);
+				//xil_printf("Core 1 Tick\r\n");
+			}
+			else if(getPlayTimerDoneFlag_sharedMemory()){
+				playTimerDoneSound();
+				//setPlayTimerDoneFlag_sharedMemory(0);
+				//setTimerRunningFlag_sharedMemory(0);
+				//xil_printf("Core 1 Beep\r\n");
+			}
+		}
+		else if (getSW2Flag_sharedMemory()){
+			xil_printf("%d\n",getVolumeControlFlag_sharedMemory());
+			// Music
+			//audio_stream();
+			music_index = 0;
+			playMusic();
+
+			if(getTimerRunningFlag_sharedMemory() && getPlayTimerDoneFlag_sharedMemory()){
+				playTimerDoneSound();
+				//setPlayTimerDoneFlag_sharedMemory(0);
+				//setTimerRunningFlag_sharedMemory(0);
+				//xil_printf("Core 1 Beep\r\n");
+			}
+		}
+	}
+}

@@ -1,0 +1,46 @@
+#ifndef __TIMER_H_
+#define __TIMER_H_
+
+#include <stdio.h>
+#include <string.h>
+#include "xtmrctr.h"
+#include "xil_printf.h"
+
+#include "interrupts.h"
+#include "display.h" //for image addresses
+#include "shared_mem.h"
+#include "home.h" //for home_screen()
+
+#define SAMPLE_RATE 44100
+#define TICK_SAMPLES 39534
+#define BEEP_SAMPLES 39534
+
+#define ONE_MINUTE 1
+
+XTmrCtr m_AxiTimer;
+
+unsigned int m_tickcounter1;
+unsigned int m_tickcounter2;
+double m_ClockPeriodSeconds;
+double m_timerClockFreq;
+
+void AXITimerInit();
+void resetTimer();
+unsigned int startTimer();
+unsigned int stopTimer();
+
+double getElapsedTimerInSeconds();
+double getElapsedTimerInSecondsAfterTimerStop();
+double getClockPeriod();
+
+//timer
+unsigned int timeElapsedInSeconds;
+unsigned int setTimerValueInSeconds;
+unsigned int nextSecond;
+int startTimerFlag;
+char timerChar[6]; //time in char
+void init_timer(int * background);
+void timer(int * background);
+void calculateTime(int starttime); //print time
+
+#endif

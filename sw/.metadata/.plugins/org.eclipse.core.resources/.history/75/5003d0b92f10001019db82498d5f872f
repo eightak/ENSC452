@@ -1,0 +1,18 @@
+#ifndef __SLIDESHOW_H_
+#define __SLIDESHOW_H_
+
+#include <stdio.h>
+#include <string.h>
+#include <sleep.h>
+#include "xil_printf.h"
+
+#include "HW_clock.h" //for ClockTime struct
+#include "display.h" //for image addresses
+#include "interrupts.h" //for switch_rising_edge
+#include "uart_func.h" //for processing uart
+
+extern int * slideshow_image;
+
+void slideshow();
+
+#endif

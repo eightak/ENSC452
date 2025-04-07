@@ -1,0 +1,55 @@
+#include "slideshow.h"
+
+localTimeData startTime;
+static int img_num = 0;
+static int ss_secs = 0;
+static int switch_time = 5; //switch image every 5 seconds
+
+int slideshow_len = 4;
+int * slideshow_images[6] = {
+	(int *)0x5A90000,
+	(int *)0x5FF0000,
+	(int *)0x65F0000,
+	(int *)0x6BF0000,
+	(int *)0x71F0000,
+	(int *)0x77F0000
+};
+
+void slideshow() {
+
+	if (processingDone && (tempbuf[0] != '\0')) {
+		if (((int)tempbuf[0]-48 >= 1) && ((int)tempbuf[0]-48 <= 10)) {
+			switch_time = (int)tempbuf[0]-48;
+			//xil_printf("slideshow length: %d\n", switch_time);
+		}
+		reset_tempbuf();
+	}
+
+	if (sw0_rising_edge) {
+		xil_printf("Starting slideshow...\n");
+		startTime = get_clock();
+		ss_secs = 0;
+		sw0_rising_edge = 0;
+		//memcpy(image_buffer, (void *)slideshow_images[0], NUM_BYTES_BUFFER);
+		memcpy(curr_image_ptr, slideshow_images[0], NUM_BYTES_BUFFER);
+		//displayImage((void *)slideshow_images[0]);
+	}
+
+	if (ss_secs == elapsed_time(startTime)) {
+		//xil_printf("ss_secs: %d\n", ss_secs);
+		//xil_printf("switch_time: %d\n", switch_time);
+		//xil_printf("index: %d\n", ss_secs % switch_time);
+		if (ss_secs % switch_time == 0) {
+			xil_printf("next image\n");
+			chooseFontColour(50, 50, slideshow_images[img_num % slideshow_len]);
+			memcpy(curr_image_ptr, slideshow_images[img_num % slideshow_len], NUM_BYTES_BUFFER);
+
+			//displayImage((void *)slideshow_images[img_num % slideshow_len]);
+			displayTime(curr_image_ptr, time_image_ptr);
+			displayImage(time_image_ptr);
+
+			img_num++;
+		}
+		ss_secs++;
+	}
+}

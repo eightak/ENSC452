@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2020.2 (64-bit)
+# SW Build 3064766 on Wed Nov 18 09:12:45 MST 2020
+# IP Build 3064653 on Wed Nov 18 14:17:31 MST 2020
+# Start of session at: Mon Feb 24 13:20:26 2025
+# Process ID: 19128
+# Current directory: C:/Users/aaa136/Desktop/452_M1/hw/dmm/dmm.runs/dmm_design_vga_controller_0_0_synth_1
+# Command line: vivado.exe -log dmm_design_vga_controller_0_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source dmm_design_vga_controller_0_0.tcl
+# Log file: C:/Users/aaa136/Desktop/452_M1/hw/dmm/dmm.runs/dmm_design_vga_controller_0_0_synth_1/dmm_design_vga_controller_0_0.vds
+# Journal file: C:/Users/aaa136/Desktop/452_M1/hw/dmm/dmm.runs/dmm_design_vga_controller_0_0_synth_1\vivado.jou
+#-----------------------------------------------------------
+source dmm_design_vga_controller_0_0.tcl -notrace

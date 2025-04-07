@@ -1,0 +1,250 @@
+#include "display.h"
+
+
+uint8_t * font_pointer = (uint8_t *)0x581A028;
+uint8_t * weather_pointer = (uint8_t *)0x5900000;
+
+int * time_image_ptr = (int *)0x4848020;
+int * curr_image_ptr = (int *)0x5031024;
+int * temp_buffer = (int *)0x4848020;
+
+int * image_buffer_pointer = (int *)0x00900000;
+
+int * tokyo_image_ptr = (int *)0x018D2008;
+int * sfu_image_ptr = (int *)0x020BB00C;
+int * london_image_ptr = (int *)0x028A4010;
+int * right_image_ptr = (int *)0x0308D014;
+int * timer_image_ptr = (int *)0x03876018;
+
+//int * sw0_image_ptr = (int *)0x405F01C;
+/* DDR USAGE IN SLIDESHOW
+int * slideshow_images[6] = {
+	(int *)0x5A90000,
+	(int *)0x5FF0000,
+	(int *)0x65F0000,
+	(int *)0x6BF0000,
+	(int *)0x71F0000,
+	(int *)0x77F0000
+};
+ */
+
+
+//int maxh = 64;
+const int maxw = 128;
+const int height = 7;
+const int width = 5;
+const int gap = 2;
+const int windoww = 1280;
+
+void write_char(int ascii, int startx, int starty, int *image_mask, int font_size){
+
+	int start = maxw + 1 + ((ascii-32) % 18)*(width+gap) + (maxw * (height+gap) * ((ascii-32) / 18));
+	int writeFrom = startx+(windoww*starty);
+
+	for (int y = 0; y < height * font_size; y++) {
+		for (int x = 0; x < width * font_size; x++) {
+			if (font_pointer[start + (x / font_size) + (maxw * (y / font_size))] == 255) {
+				image_mask[writeFrom + x + (windoww * y)] = font_colour;
+			}
+		}
+	}
+
+	// Copy the modified temp buffer back to image_pointer
+	//memcpy(image_buffer_pointer, temp_buffer, NUM_BYTES_BUFFER);
+	//displayImage(temp_buffer);
+
+}
+
+void write_string(char *c, int startx, int starty, int *base_mask, int *image_mask, int font_size){
+
+	memcpy(image_mask, base_mask, NUM_BYTES_BUFFER);
+
+	//chooseFontColour(strlen(c)-1, startx, starty, base_mask, font_size);
+
+	int i = 0;
+	while(c[i] != '\0'){
+		write_char(c[i], startx + (i*((width*font_size) + gap)), starty, image_mask, font_size);
+		i++;
+	}
+}
+
+void displayImage(int * image_mask) {
+	memcpy(image_buffer_pointer, image_mask, NUM_BYTES_BUFFER);
+	usleep(100);
+	memcpy(image_buffer_pointer, image_mask, NUM_BYTES_BUFFER);
+}
+
+void displayTime(int *base_mask, int *image_mask) {
+	localTimeData ct = get_clock();
+	char timeChar[9];
+	sprintf(timeChar, "%02d:%02d:%02d", ct.hour, ct.min, ct.sec);
+
+	write_string(timeChar, 50, 70, base_mask, image_mask, 10);
+}
+
+void displayWeather(int *base_mask, int *image_mask) {
+
+	char humMessage[20];
+	char tempMessage[20];
+	char locationMessage[20];
+
+	chooseFontColour(50, 150, base_mask);
+
+	strcpy(locationMessage, "Location:");
+	if (strcmp(weather.country, "GB") == 0) {
+		strcat(locationMessage, "London");
+	}
+	else if (strcmp(weather.country, "JP") == 0) {
+		strcat(locationMessage, "Tokyo");
+	}
+	else { //if(strcmp(weather.country, "CA") == 0) {
+		strcat(locationMessage, "SFU");
+	}
+	sprintf(humMessage, "Humidity:%d%%", weather.hum);
+	strcpy(tempMessage, "Temperature:");
+	strcat(tempMessage, weather.tempstr);
+	strcat(tempMessage, "c");
+
+	memcpy(temp_buffer, base_mask, NUM_BYTES_BUFFER);
+
+	write_string(locationMessage, 50, 30, base_mask, temp_buffer, 3);
+	write_string(humMessage, 280, 230, temp_buffer, temp_buffer, 3);
+	write_string(tempMessage, 280, 260, temp_buffer, temp_buffer, 3);
+
+	if (strcmp(weather.condition, "Clear") == 0) {
+		//xil_printf("Clear\n");
+		weatherIcon(0,0, temp_buffer, image_mask);
+	}
+	else if (strcmp(weather.condition, "Clouds") == 0) {
+		//xil_printf("Clouds\n");
+		weatherIcon(700,0, temp_buffer, image_mask);
+	}
+	else if (strcmp(weather.condition, "Rain") == 0) {
+		//xil_printf("Rain\n");
+		weatherIcon(0,180, temp_buffer, image_mask);
+	}
+	else {
+		//xil_printf("Heavy Rain\n");
+		weatherIcon(525,180, temp_buffer, image_mask);
+	}
+}
+
+void weatherIcon(int startx, int starty, int *base_mask, int *image_mask) {
+
+	int iconSize = 100;
+	//int HGap = 75;
+	//int VGap = 80;
+	int font_size = 2;
+	int weatherw = 800;
+
+	memcpy(image_mask, base_mask, NUM_BYTES_BUFFER);
+
+	int start = startx+(weatherw*starty);
+	int writeFrom = 50 + (windoww*150);
+
+	for (int y = 0; y < iconSize * font_size; y++) {
+		for (int x = 0; x < iconSize * font_size; x++) {
+			if (weather_pointer[start + (x / font_size) + (weatherw * (y / font_size))] < 200) {
+				image_mask[writeFrom + x + (windoww * y)] = font_colour;
+			}
+		}
+	}
+
+	//displayImage(temp_buffer);
+}
+
+void displayDate(int *base_mask, int *image_mask) {
+
+	memcpy(temp_buffer, base_mask, NUM_BYTES_BUFFER);
+
+	char year[7];
+	char date[15];
+	char day[3];
+	sprintf(year, "%d", localTime.year);
+
+	switch((int)localTime.month) {
+	case (1):
+		sprintf(date, "January ");
+		break;
+	case (2):
+		sprintf(date, "February ");
+		break;
+	case (3):
+		sprintf(date, "March ");
+		break;
+	case (4):
+		sprintf(date, "April ");
+		break;
+	case (5):
+		sprintf(date, "May ");
+		break;
+	case (6):
+		sprintf(date, "June ");
+		break;
+	case (7):
+		sprintf(date, "July ");
+		break;
+	case (8):
+		sprintf(date, "August ");
+		break;
+	case (9):
+		sprintf(date, "September ");
+		break;
+	case (10):
+		sprintf(date, "October ");
+		break;
+	case (11):
+		sprintf(date, "November ");
+		break;
+	case (12):
+		sprintf(date, "December ");
+		break;
+	}
+
+	sprintf(day, "%d", localTime.day);
+	strcat(date, day);
+
+	write_string(date, 500, 50, base_mask, temp_buffer, 4);
+	write_string(year, 500, 90, temp_buffer, image_mask, 4);
+
+}
+
+//takes 3 sample points and chooses black font or white font
+void chooseFontColour(int startx, int starty, int *base_mask) {
+
+	int writeFrom = startx + (windoww * starty);
+
+	uint32_t sample1 = base_mask[writeFrom];
+	uint32_t sample2 = base_mask[writeFrom + 100 + (windoww * 100)];
+	uint32_t sample3 = base_mask[writeFrom + 200 + (windoww * 200)];
+
+	uint8_t r1 = sample1 & 0xFF;
+	uint8_t g1 = (sample1 >> 8) & 0xFF;
+	uint8_t b1 = (sample1 >> 16) & 0xFF;
+
+	uint8_t r2 = sample2 & 0xFF;
+	uint8_t g2 = (sample2 >> 8) & 0xFF;
+	uint8_t b2 = (sample2 >> 16) & 0xFF;
+
+	uint8_t r3 = sample3 & 0xFF;
+	uint8_t g3 = (sample3 >> 8) & 0xFF;
+	uint8_t b3 = (sample3 >> 16) & 0xFF;
+
+	float lum1 = 0.2126 * ((float)r1 / 255) + 0.7152 * ((float)g1 / 255) + 0.0722 * ((float)b1 / 255);
+	float lum2 = 0.2126 * ((float)r2 / 255) + 0.7152 * ((float)g2 / 255) + 0.0722 * ((float)b2 / 255);
+	float lum3 = 0.2126 * ((float)r3 / 255) + 0.7152 * ((float)g3 / 255) + 0.0722 * ((float)b3 / 255);
+
+	//xil_printf("lum1 = %d.%03d\n", (int)lum1, (int)((lum1 - (int)lum1) * 1000));
+	//xil_printf("lum2 = %d.%03d\n", (int)lum2, (int)((lum2 - (int)lum2) * 1000));
+	//xil_printf("lum3 = %d.%03d\n", (int)lum3, (int)((lum3 - (int)lum3) * 1000));
+
+	if (((lum1 > 0.5) + (lum2 > 0.5) + (lum3 > 0.5)) >= 1) {
+		//xil_printf("dark gray\n");
+		//font_colour = 0xFF333333;
+		font_colour = 0xFF1E1E1E;
+	}
+	else {
+		//xil_printf("light gray\n");
+		font_colour = 0xFFD3D3D3;
+	}
+}

@@ -1,0 +1,95 @@
+#include "data_reception.h"
+
+/* FSM STATES:
+ * 0: RECEIVE MESSAGE
+ * 1: PROCESS IMAGE IN
+ * 2: PROCESS WEATHER IN
+ * 3: PROCESS TIME IN
+ */
+
+int * ethernet_image_ptr = (int *)0x07DF0000;
+uint8_t * ethernet_image_uint8 = (uint8_t *)0x083F0000;
+
+void receive_reception() {
+	//int size = BUF_SIZE;
+
+	switch (fsm_state) {
+	case 0:
+		if (strcasecmp(reception, "image") == 0) {
+			xil_printf("ready to receive image\n");
+			fsm_state = 1;
+		}
+		else if (strcasecmp(reception, "weather") == 0) {
+			xil_printf("ready to receive weather\n");
+			fsm_state = 2;
+		}
+		else if (strcasecmp(reception, "time") == 0) {
+			xil_printf("ready to receive time\n");
+			fsm_state = 3;
+		}
+		else {
+
+		}
+		break;
+	case 1:
+
+		//process image into memory
+		if (pixelsProcessed) {
+
+			for (int i = 0; i < IMAGE_SIZE-4; i+=4) {
+				ethernet_image_ptr[i/4] = (int)(
+										((uint32_t)ethernet_image_uint8[i+3] << 24) |
+										((uint32_t)ethernet_image_uint8[i] << 16) |
+										((uint32_t)ethernet_image_uint8[i+1] << 8) |
+										 (uint32_t)ethernet_image_uint8[i+2]
+																	   );
+			}
+
+			displayImage(ethernet_image_ptr);
+
+			xil_printf("image processed\n");
+			fflush(stdout);
+
+			fsm_state = 0;
+			pixelsProcessed = 0;
+		}
+
+		//process image into memory
+		//xil_printf("processing image...\n");
+		//xil_printf("message: %s\n", fsm1);
+
+		//fsm_state = 0;
+		//memset(fsm1, '\0', BUF_SIZE);
+		break;
+	case 2:
+		xil_printf("processing weather...\n");
+		xil_printf("Temperature: %s°C\n", weather.tempstr);
+		xil_printf("Humidity: %d%%\n", weather.hum);
+		xil_printf("Condition: %s\n", weather.condition);
+
+		fsm_state = 0;
+		//memset(&weather, 0, sizeof(weatherData));
+		break;
+	case 3:
+		xil_printf("processing time...\n");
+		xil_printf("Year: %d\n", localTime.year);
+		xil_printf("Month: %d\n", localTime.month);
+		xil_printf("Day: %d\n", localTime.day);
+		xil_printf("Hour: %d\n", localTime.hour);
+		xil_printf("Min: %d\n", localTime.min);
+		xil_printf("Sec: %d\n", localTime.sec);
+
+		set_clock(localTime);
+
+		fsm_state = 0;
+		//memset(&localTime, 0, sizeof(localTimeData));
+		break;
+	default:
+		//do nothing
+
+		fsm_state = 0;
+		break;
+	}
+
+	memset(reception, '\0', BUF_SIZE);
+}

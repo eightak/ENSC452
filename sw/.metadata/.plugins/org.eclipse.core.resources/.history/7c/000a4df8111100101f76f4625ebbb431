@@ -1,0 +1,115 @@
+#include "stopwatch.h"
+
+void init_stopwatch(int * background) {
+	swStartFlag = 0;
+	swRunningFlag = 0;
+	sw_timeElapsedInSeconds = 0;
+	sw_nextSecond = 0;
+	swSavedTime = 0;
+}
+void stopwatch(int * background) {
+	if (sw4_rising_edge) {
+		init_stopwatch();
+		sw4_rising_edge = 0;
+	}
+
+    // Stop watch
+
+	 if(swStartFlag == 0  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 swSavedTime = 0;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+	 }
+
+	 if(swStartFlag == 1  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+	 }
+
+	 if(swRunningFlag){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+	 }
+
+	 if(sw_timeElapsedInSeconds !=  sw_nextSecond){
+		 sw_nextSecond = sw_timeElapsedInSeconds;
+		 secondsToTimeStr(sw_timeElapsedInSeconds, swtimeStr, 6);
+		 xil_printf("%s\n", swtimeStr);
+		 // display sw
+	 }
+
+	 // stop/pause
+	 if(swRunningFlag && (XGpio_DiscreteRead(&BTNInst, 1) == LEFT_BUTTON)){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+		 swSavedTime += (unsigned int)stopTimer();
+		 resetTimer();
+		 swRunningFlag = 0;
+		 xil_printf("%s\n", swtimeStr);
+	 }
+
+	 //reset
+	 if(swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == CENTRE_BUTTON)){
+		 resetTimer();
+		 swRunningFlag = 0;
+		 swStartFlag = 0;
+		 swSavedTime = 0;
+		 secondsToTimeStr(0, swtimeStr, 6);
+	 }        // Stop watch
+
+	 if(swStartFlag == 0  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 swSavedTime = 0;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+	 }
+
+	 if(swStartFlag == 1  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+	 }
+
+	 if(swRunningFlag){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+	 }
+
+	 if(sw_timeElapsedInSeconds !=  sw_nextSecond){
+		 sw_nextSecond = sw_timeElapsedInSeconds;
+		 secondsToTimeStr(sw_timeElapsedInSeconds, swtimeStr, timeStrSize);
+		 xil_printf("%s\n", swtimeStr);
+		 // display sw
+	 }
+
+	 // stop/pause
+	 if(swRunningFlag && (XGpio_DiscreteRead(&BTNInst, 1) == LEFT_BUTTON)){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+		 swSavedTime += (unsigned int)stopTimer();
+		 resetTimer();
+		 swRunningFlag = 0;
+		 xil_printf("%s\n", swtimeStr);
+	 }
+
+	 //reset
+	 if(swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == CENTRE_BUTTON)){
+		 resetTimer();
+		 swRunningFlag = 0;
+		 swStartFlag = 0;
+		 swSavedTime = 0;
+		 secondsToTimeStr(0, swtimeStr, 6);
+	 }
+}
+
+void secondsToTimeStr(int total_seconds, char *time_str, size_t size){
+
+    int minutes = (total_seconds % 3600) / 60;
+    int seconds = total_seconds % 60;
+
+    // Format the string safely using snprintf
+    snprintf(time_str, size, "%02d:%02d", minutes, seconds);
+
+}

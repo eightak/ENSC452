@@ -1,0 +1,90 @@
+#include "data_reception.h"
+
+/* FSM STATES:
+ * 0: RECEIVE MESSAGE
+ * 1: PROCESS IMAGE IN
+ * 2: PROCESS WEATHER IN
+ * 3: PROCESS TIME IN
+ */
+
+
+void receive_reception() {
+	//int size = BUF_SIZE;
+
+	switch (fsm_state) {
+	case 0:
+		if (strcasecmp(reception, "image") == 0) {
+			xil_printf("ready to receive image\n");
+			fsm_state = 1;
+		}
+		else if (strcasecmp(reception, "weather") == 0) {
+			xil_printf("ready to receive weather\n");
+			fsm_state = 2;
+		}
+		else if (strcasecmp(reception, "time") == 0) {
+			xil_printf("ready to receive time\n");
+			fsm_state = 3;
+		}
+		else {
+
+		}
+		break;
+	case 1:
+		//process image into memory
+		if (pixelsProcessed == imageSize) {
+			xil_printf("image received..\n");
+			fflush(stdout);
+
+			pixelsProcessed = 0;
+			imageBuf = imageBuffer;
+
+			for (int i = 0; i < imageSize-4; i+=4) {
+				image_mask[i/4] = ((uint32_t)imageBuffer[i+3] << 24) | ((uint32_t)imageBuffer[i] << 16) | ((uint32_t)imageBuffer[i+1] << 8) | (uint32_t)imageBuffer[i+2];
+			}
+
+			memcpy(image1_pointer, image_mask, imageSize);
+
+			printf("image processed\n");
+			fflush(stdout);
+
+			fsm_state = 0;
+			memset(fsm1, '\0', BUF_SIZE);
+		}
+		xil_printf("processing image...\n");
+
+
+		fsm_state = 0;
+		memset(fsm1, '\0', BUF_SIZE);
+		break;
+	case 2:
+		xil_printf("processing weather...\n");
+		xil_printf("Temperature: %s°C\n", weather.tempstr);
+		xil_printf("Humidity: %d%%\n", weather.hum);
+		xil_printf("Condition: %s\n", weather.condition);
+
+		fsm_state = 0;
+		//memset(&weather, 0, sizeof(weatherData));
+		break;
+	case 3:
+		xil_printf("processing time...\n");
+		xil_printf("Year: %d\n", localTime.year);
+		xil_printf("Month: %d\n", localTime.month);
+		xil_printf("Day: %d\n", localTime.day);
+		xil_printf("Hour: %d\n", localTime.hour);
+		xil_printf("Min: %d\n", localTime.min);
+		xil_printf("Sec: %d\n", localTime.sec);
+
+		set_clock(localTime);
+
+		fsm_state = 0;
+		//memset(&localTime, 0, sizeof(localTimeData));
+		break;
+	default:
+		//do nothing
+
+		fsm_state = 0;
+		break;
+	}
+
+	memset(reception, '\0', BUF_SIZE);
+}

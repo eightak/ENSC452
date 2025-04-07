@@ -1,0 +1,55 @@
+#ifndef __DATA_RECEPTION_H_
+#define __DATA_RECEPTION_H_
+
+#include <stdio.h>
+#include <string.h>
+
+#include "lwip/err.h"
+#include "lwip/tcp.h"
+#include "xil_printf.h"
+
+#include "DMMC/HW_clock.h" //for TimeStruct and set_clock()
+#include "DMMC/display.h" //for weather struct
+
+#define BUF_SIZE   100
+#define IMAGE_SIZE 1024*1280*4
+
+//MOVED TO display.h
+/*
+typedef struct {
+	float temp;
+	int hum;
+	char condition[15];
+	char tempstr[5];
+} weatherData;
+*/
+
+//MOVED TO HW_clock.h
+/*
+typedef struct {
+	uint16_t year;
+	uint8_t month;
+	uint8_t day;
+	uint8_t hour;
+	uint8_t min;
+	uint8_t sec;
+} localTimeData;
+*/
+
+int fsm_state;
+
+char reception[BUF_SIZE];
+char fsm1[BUF_SIZE];
+//char fsm2[BUF_SIZE];
+
+//weatherData weather;
+//localTimeData localTime;
+//uint8_t ethernet_image_uint8[1024*1280*4];
+//int ether_image[1024*1280];
+//int pixelsProcessed;
+
+//int image1_pointer[1024*1280];
+
+void receive_reception();
+
+#endif

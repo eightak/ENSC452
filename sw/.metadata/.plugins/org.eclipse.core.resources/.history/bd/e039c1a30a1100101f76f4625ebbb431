@@ -1,0 +1,124 @@
+
+#include "interrupts.h"
+
+void Btn_InterruptHandler(void *InstancePtr)
+{
+	button_pressed_flag = 0;
+	//Disable GPIO interrupts
+	XGpio_InterruptDisable(&BTNInst, BTN_INT);
+	XGpio_InterruptDisable(&BTNInst, SW_INT);
+	// Ignore additional button presses
+	if (((XGpio_InterruptGetStatus(&BTNInst) & BTN_INT) != BTN_INT) && btn_value == XGpio_DiscreteRead(&BTNInst, 1)) {
+		button_pressed_flag = 1;
+	}
+
+	int btn_read = XGpio_DiscreteRead(&BTNInst, 1);
+
+	usleep(10000);
+
+	int btn_read_after_delay = XGpio_DiscreteRead(&BTNInst, 1);
+
+	if ((btn_read == btn_read_after_delay) && (btn_read != 0)) {
+		btn_value = btn_read;
+		button_pressed_flag = 1;
+		xil_printf("button pressed\n");
+	}
+
+	sw_value = XGpio_DiscreteRead(&BTNInst, 2);
+
+	sw0_bit = (sw_value >> 0) & 1;
+	sw1_bit = (sw_value >> 1) & 1;
+	sw2_bit = (sw_value >> 2) & 1;
+	sw3_bit = (sw_value >> 3) & 1;
+
+	if ((prev_sw_value < sw_value) && (sw_value > 0)) { //rising edge
+		if (sw0_bit == 1) {
+			sw0_rising_edge = 1;
+		}
+		if (sw1_bit == 1) {
+			sw1_rising_edge = 1;
+		}
+		if (sw2_bit == 1) {
+			sw2_rising_edge = 1;
+		}
+		if (sw3_bit == 1) {
+			sw3_rising_edge = 1;
+		}
+		//xil_printf("switch rising edge\n");
+	}
+
+	//if ((prev_sw_value > 0) && (sw_value == 0)) { //falling edge
+	xil_printf("Previous switch value = %d\n", prev_sw_value);
+	xil_printf("Switch Value = %d\n", sw_value);
+	if (prev_sw_value > sw_value) {
+		switch_falling_edge = 1;
+		xil_printf("switch falling edge\n");
+	}
+
+	prev_sw_value = sw_value;
+
+	//xil_printf("Button Value = %d\n", btn_value);
+	//xil_printf("Switch Value = %d\n", sw_value);
+
+	(void)XGpio_InterruptClear(&BTNInst, BTN_INT);
+	(void)XGpio_InterruptClear(&BTNInst, SW_INT);
+
+	// Enable GPIO interrupts
+	XGpio_InterruptEnable(&BTNInst, BTN_INT);
+	XGpio_InterruptEnable(&BTNInst, SW_INT);
+
+}
+
+int SetUpInterruptSystem(XScuGic *XScuGicInstancePtr){
+
+	//Enable Interrupt
+	XGpio_InterruptEnable(&BTNInst, BTN_INT);
+	XGpio_InterruptGlobalEnable(&BTNInst);
+
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+	(Xil_ExceptionHandler) XScuGic_InterruptHandler,
+	XScuGicInstancePtr);
+	Xil_ExceptionEnable();
+	return XST_SUCCESS;
+}
+
+/*Setup all interrupts of the system*/
+int ScuGicInterrupt_Init(u16 DeviceId, XGpio *GpioInstancePtr)
+{
+	XScuGic_Config *IntcConfig;
+	int Status;
+
+	IntcConfig = XScuGic_LookupConfig(DeviceId);
+	if (NULL == IntcConfig) {
+		return XST_FAILURE;
+	}
+	Status = XScuGic_CfgInitialize(&InterruptController, IntcConfig,
+	IntcConfig->CpuBaseAddress);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	Status = SetUpInterruptSystem(&InterruptController);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	//Connect a device driver handler that will be called when an interrupt for the device occurs, the device driver handler performs the specific interrupt processing for the device
+	Status = XScuGic_Connect(&InterruptController, INTC_GPIO_INTERRUPT_ID,
+							(Xil_ExceptionHandler)Btn_InterruptHandler,
+							(void *)GpioInstancePtr);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	// Enable GPIO interrupts interrupt
+	XGpio_InterruptEnable(GpioInstancePtr, 1);
+	XGpio_InterruptEnable(GpioInstancePtr, 2);
+	XGpio_InterruptGlobalEnable(GpioInstancePtr);
+
+	// Enable GPIO interrupts in the controller
+	XScuGic_Enable(&InterruptController, INTC_GPIO_INTERRUPT_ID);
+
+	return XST_SUCCESS;
+}
+

@@ -1,0 +1,17 @@
+#include "stopwatch.h"
+
+void init_stopwatch(int * background) {
+	swStartFlag = 0;
+	swRunningFlag = 0;
+	sw_timeElapsedInSeconds = 0;
+	sw_nextSecond = 0;
+	swSavedTime = 0;
+}
+void stopwatch(int * background) {
+	if (sw4_rising_edge) {
+		init_stopwatch();
+		sw4_rising_edge = 0;
+	}
+
+
+}

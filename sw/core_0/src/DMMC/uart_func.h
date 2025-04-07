@@ -1,0 +1,33 @@
+#ifndef __UART_FUNC_H_
+#define __UART_FUNC_H_
+
+#include <stdio.h>
+#include "xil_printf.h"
+#include "xparameters.h"
+#include "xuartps.h"
+
+#include "interrupts.h" //UART BASEADDR
+
+#define BUFFER_SIZE 100
+
+
+u32 CntrlRegister;
+uint8_t tempbuf[BUFFER_SIZE];
+uint8_t messageIn[BUFFER_SIZE];
+XUartPs_Config *myUartConfig;
+XUartPs myUart;
+int receivedBytes;
+int processingDone;
+
+//#include "../echo.c" PROTOTYPE FUNCTIONs
+void receiveMessage(uint8_t*, int);
+
+int idx;
+
+int init_uart();
+
+void getUart();
+
+void reset_tempbuf();
+
+#endif

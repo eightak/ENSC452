@@ -1,0 +1,50 @@
+#include "music.h"
+
+#include <stdio.h>
+#include <string.h>
+#include "xparameters.h"
+#include "random_num_gen_ip.h"
+#include "xil_io.h"
+#include "shared_mem.h"
+#include "interrupts.h" //button values
+
+void music() {
+	if (button_pressed_flag) {
+		switch(btn_value) {
+		case (CENTRE_BUTTON):
+			//xil_printf("centre button in music\n");
+			;
+			int music_mode = getMusicMode_sharedMemory();;
+			//music_mode =
+			music_mode = ++music_mode;
+			music_mode = music_mode % NUM_MUSIC_MODE;
+			/*
+			if (music_mode < NUM_MUSIC_MODE){
+				music_mode++;
+			}
+			else{
+				music_mode = 0;
+			}
+			*/
+			setMusicMode_sharedMemory(music_mode);
+			xil_printf("music_mode = %d\n", music_mode);
+			break;
+		case (UP_BUTTON):
+				//xil_printf("up button in music\n");
+			setVolumeControlFlag_sharedMemory(1);
+			break;
+		case (DOWN_BUTTON):
+				//xil_printf("down button in music\n");
+			setVolumeControlFlag_sharedMemory(2);
+			break;
+		case (RIGHT_BUTTON):
+				//xil_printf("right button in music\n");
+			setCurrentTrack_sharedMemory(1);
+			break;
+		case (LEFT_BUTTON):
+				//xil_printf("left button in music\n");
+			setCurrentTrack_sharedMemory(2);
+			break;
+		}
+	}
+}

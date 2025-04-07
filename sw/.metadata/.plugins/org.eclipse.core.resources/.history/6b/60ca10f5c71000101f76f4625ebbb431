@@ -1,0 +1,23 @@
+#ifndef __SLIDESHOW_H_
+#define __SLIDESHOW_H_
+
+#include <stdio.h>
+#include <string.h>
+#include <sleep.h>
+#include "xil_printf.h"
+
+#include "HW_clock.h" //for ClockTime struct
+#include "display.h" //for image addresses
+#include "interrupts.h" //for switch_rising_edge
+#include "uart_func.h" //for processing uart
+#include "random_num_gen_ip.h"
+
+#define RAND_NUM_BASE XPAR_RANDOM_NUM_GEN_IP_0_S00_AXI_BASEADDR
+#define MAX_SS_LEN 6
+
+extern int slideshow_len;
+extern int * slideshow_images[MAX_SS_LEN];
+
+void slideshow();
+
+#endif

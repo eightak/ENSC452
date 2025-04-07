@@ -1,0 +1,182 @@
+#include "dmmc.h"
+
+const localTimeData ctRST = {0, 1, 1, 0, 0, 0};
+
+int elapsed_seconds = 0;
+
+int Setup(){
+
+	int xStatus;
+
+	//Set "previous" sw value to 0
+	prev_sw_value = 0;
+	sw0_rising_edge = 0;
+	sw1_rising_edge = 0;
+	sw2_rising_edge = 0;
+	sw3_rising_edge = 0;
+	sw4_rising_edge = 0;
+	switch_falling_edge = 0;
+
+	xStatus = XGpio_Initialize(&BTNInst, BTNS_DEVICE_ID);
+	if (xStatus != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	XGpio_SetDataDirection(&BTNInst, 1, 0xFF);
+	XGpio_SetDataDirection(&BTNInst, 2, 0xFF);
+
+	//xStatus=ScuGicInterrupt_Init(XPAR_PS7_SCUGIC_0_DEVICE_ID, &BTNInst, &TimerInstancePtr);
+	xStatus=ScuGicInterrupt_Init(XPAR_PS7_SCUGIC_0_DEVICE_ID, &BTNInst);
+	if(xStatus != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	btn_value = XGpio_DiscreteRead(&BTNInst, 1);
+	sw_value = XGpio_DiscreteRead(&BTNInst, 2);
+
+	//INITIALIZATIONS
+	//Reinitialize global clock to 0
+	set_clock(ctRST);
+
+	localTime = ctRST;
+
+	init_uart();
+
+	AXITimerInit();
+
+	slideshow_init();
+
+	setTimerRunningFlag_sharedMemory(0);
+	setPlayTimerTickFlag_sharedMemory(0);
+	setPlayTimerDoneFlag_sharedMemory(0);
+	setSW2Flag_sharedMemory(0);
+	setVolumeControlFlag_sharedMemory(0);
+	setTTSFlag_sharedMemory(0);
+
+	chooseFontColour(50, 150, sfu_image_ptr);
+
+	memcpy(curr_image_ptr, sfu_image_ptr, NUM_BYTES_BUFFER);
+
+	showTimeFlag = 1;
+
+	xil_printf("CPU0: Initialized\n");
+
+	return 0;
+}
+
+void MainLoop(){
+	//elapsed_seconds = elapsed_time(ctRST);
+	//while(1){
+		//Operations that trigger once per second
+		if (elapsed_time(ctRST) != elapsed_seconds) {
+			//do something
+			//xil_printf("%d\n", elapsed_time(ctRST));
+
+			if (showTimeFlag == 1) {
+				displayTime(curr_image_ptr, time_image_ptr);
+				displayImage(time_image_ptr);
+
+				if (sw2_bit) {
+					displayMusic(time_image_ptr, time_image_ptr);
+					displayImage(time_image_ptr);
+				}
+			}
+			elapsed_seconds = elapsed_time(ctRST);
+		}
+
+		if (sw3_rising_edge) {
+			shuffleMusicArray(MUSIC_ARRAY);
+			sw3_rising_edge = 0;
+		}
+
+		//Always ready for Uart Input
+		getUart();
+
+		if (sw2_rising_edge) {
+			//xil_printf("music start?\n");
+			setSW2Flag_sharedMemory(1);
+			sw2_rising_edge = 0;
+
+			displayMusic(time_image_ptr, time_image_ptr);
+			displayImage(time_image_ptr);
+		}
+
+		if(sw1_bit == 1){ //TIMER MODE
+			//Disable Clock
+			showTimeFlag = 0;
+
+			//memcpy(curr_image_ptr, timer_image_ptr, NUM_BYTES_BUFFER);
+			init_timer(timer_image_ptr);
+			//xil_printf("sw1\n");
+			//memcpy(image_buffer_pointer, sw1_image_ptr, NUM_BYTES_BUFFER);
+
+		}
+		else if(sw0_bit == 1){ //SLIDESHOW MODE
+			//Enable Clock (if not enabled already)
+			showTimeFlag = 1;
+
+			slideshow(button_pressed_flag);
+			//memcpy(image_buffer_pointer, sw0_image_ptr, NUM_BYTES_BUFFER);
+			//xil_printf("sw0\n");
+		}
+		else if (sw2_bit == 1) {
+			music();
+		}
+		else if (sw4_bit == 1) {
+			stopwatch(timer_image_ptr);
+		}
+		else if (button_pressed_flag) {
+			switch (btn_value) {
+			  case CENTRE_BUTTON:
+			      xil_printf("centre button\n");
+
+				  //memcpy(image_buffer_pointer, centre_image_ptr, NUM_BYTES_BUFFER);
+				  home_screen();
+			    break;
+			  case DOWN_BUTTON:
+				  xil_printf("down button\n");
+				  setVolumeControlFlag_sharedMemory(2);
+				  //memcpy(curr_image_ptr, down_image_ptr, NUM_BYTES_BUFFER);
+				  //displayImage(down_image_ptr);
+			    break;
+			  case LEFT_BUTTON:
+				  xil_printf("left button\n");
+				  shuffleSlideshow();
+				  //displayImage(left_image_ptr);
+				  //memcpy(curr_image_ptr, left_image_ptr, NUM_BYTES_BUFFER);
+				  //displayTime(left_image_ptr);
+			    break;
+			  case RIGHT_BUTTON:
+				  xil_printf("right button\n");
+				  //localTimeData ct = {2025,3,31,3,10,45};
+				  //set_clock(ct);
+				  //memcpy(curr_image_ptr, right_image_ptr, NUM_BYTES_BUFFER);
+				  //displayImage(right_image_ptr);
+			    break;
+			  case UP_BUTTON:
+				  xil_printf("up button\n");
+				  setVolumeControlFlag_sharedMemory(1);
+				  //memcpy(curr_image_ptr, up_image_ptr, NUM_BYTES_BUFFER);
+				  //displayImage(up_image_ptr);
+			    break;
+			}
+		}
+
+		if (switch_falling_edge) {
+			//xil_printf("falling edge detected\n");
+			if (sw2_bit == 0) {
+				setSW2Flag_sharedMemory(0);
+			}
+
+			if (sw3_bit == 0) {
+				revertMusicToOriginalQueue(MUSIC_ARRAY_OG, MUSIC_ARRAY);
+			}
+
+			home_screen();
+			switch_falling_edge = 0;
+		}
+
+		button_pressed_flag = 0;
+	//}
+}
+

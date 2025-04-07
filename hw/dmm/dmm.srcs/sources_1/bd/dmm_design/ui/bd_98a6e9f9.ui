@@ -1,0 +1,77 @@
+{
+   "ActiveEmotionalView":"Default View",
+   "Default View_ScaleFactor":"0.66091",
+   "Default View_TopLeft":"51,123",
+   "ExpandedHierarchyInLayout":"",
+   "guistr":"# # String gsaved with Nlview 7.0r6  2020-01-29 bk=1.5227 VDI=41 GEI=36 GUI=JA:10.0 non-TLS
+#  -string -flagsOSRD
+preplace port DDR -pg 1 -lvl 4 -x 1280 -y 60 -defaultsOSRD
+preplace port FIXED_IO -pg 1 -lvl 4 -x 1280 -y 80 -defaultsOSRD
+preplace port IIC_0 -pg 1 -lvl 4 -x 1280 -y 100 -defaultsOSRD
+preplace port GPIO -pg 1 -lvl 4 -x 1280 -y 700 -defaultsOSRD
+preplace port btns_5bits -pg 1 -lvl 4 -x 1280 -y 380 -defaultsOSRD
+preplace port sws_8bits -pg 1 -lvl 4 -x 1280 -y 400 -defaultsOSRD
+preplace port BCLK -pg 1 -lvl 4 -x 1280 -y 830 -defaultsOSRD
+preplace port LRCLK -pg 1 -lvl 4 -x 1280 -y 850 -defaultsOSRD
+preplace port SDATA_O -pg 1 -lvl 4 -x 1280 -y 870 -defaultsOSRD
+preplace port FCLK_CLK1 -pg 1 -lvl 4 -x 1280 -y 320 -defaultsOSRD
+preplace port SDATA_I -pg 1 -lvl 0 -x 0 -y 840 -defaultsOSRD
+preplace port VGA_HS -pg 1 -lvl 4 -x 1280 -y 990 -defaultsOSRD
+preplace port VGA_VS -pg 1 -lvl 4 -x 1280 -y 1010 -defaultsOSRD
+preplace portBus VGA_R -pg 1 -lvl 4 -x 1280 -y 930 -defaultsOSRD
+preplace portBus VGA_G -pg 1 -lvl 4 -x 1280 -y 950 -defaultsOSRD
+preplace portBus VGA_B -pg 1 -lvl 4 -x 1280 -y 970 -defaultsOSRD
+preplace inst processing_system7_0 -pg 1 -lvl 1 -x 310 -y 180 -defaultsOSRD
+preplace inst ps7_0_axi_periph -pg 1 -lvl 2 -x 770 -y 490 -defaultsOSRD
+preplace inst zed_audio_ctrl_0 -pg 1 -lvl 3 -x 1120 -y 850 -defaultsOSRD
+preplace inst axi_gpio_0 -pg 1 -lvl 3 -x 1120 -y 700 -defaultsOSRD
+preplace inst axi_gpio_1 -pg 1 -lvl 3 -x 1120 -y 400 -defaultsOSRD
+preplace inst vga_controller_0 -pg 1 -lvl 2 -x 770 -y 970 -defaultsOSRD
+preplace inst clk_wiz_0 -pg 1 -lvl 1 -x 310 -y 640 -defaultsOSRD
+preplace inst proc_sys_reset_0 -pg 1 -lvl 1 -x 310 -y 490 -defaultsOSRD
+preplace inst axi_timer_0 -pg 1 -lvl 3 -x 1120 -y 210 -defaultsOSRD
+preplace inst random_num_gen_ip_0 -pg 1 -lvl 3 -x 1120 -y 1090 -defaultsOSRD
+preplace inst global_clk_0 -pg 1 -lvl 3 -x 1120 -y 560 -defaultsOSRD
+preplace netloc processing_system7_0_FCLK_CLK0 1 0 3 40 380 580 230 940
+preplace netloc processing_system7_0_FCLK_RESET0_N 1 0 2 60 390 550
+preplace netloc zed_audio_ctrl_0_BCLK 1 3 1 NJ 830
+preplace netloc zed_audio_ctrl_0_LRCLK 1 3 1 NJ 850
+preplace netloc zed_audio_ctrl_0_SDATA_O 1 3 1 NJ 870
+preplace netloc processing_system7_0_FCLK_CLK1 1 1 3 550J 70 NJ 70 1260J
+preplace netloc SDATA_I 1 0 3 NJ 840 NJ 840 NJ
+preplace netloc processing_system7_0_FCLK_CLK2 1 0 2 30 710 570
+preplace netloc clk_wiz_0_clk_out1 1 1 1 560 630n
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 2 600 260 950
+preplace netloc vga_controller_0_VGA_R 1 2 2 920J 940 1260J
+preplace netloc vga_controller_0_VGA_G 1 2 2 NJ 950 NJ
+preplace netloc vga_controller_0_VGA_B 1 2 2 NJ 970 NJ
+preplace netloc processing_system7_0_S_AXI_HP0_RCOUNT 1 0 2 20 1010 NJ
+preplace netloc proc_sys_reset_0_peripheral_reset 1 1 1 550 490n
+preplace netloc vga_controller_0_VGA_HS 1 2 2 NJ 990 NJ
+preplace netloc vga_controller_0_VGA_VS 1 2 2 NJ 1010 NJ
+preplace netloc axi_gpio_1_ip2intc_irpt 1 0 4 60 370 560J 50 NJ 50 1250
+preplace netloc processing_system7_0_FCLK_CLK3 1 1 2 620 240 N
+preplace netloc ps7_0_axi_periph_M04_AXI 1 2 1 960 160n
+preplace netloc processing_system7_0_DDR 1 1 3 NJ 60 NJ 60 NJ
+preplace netloc axi_gpio_0_GPIO 1 3 1 NJ 700
+preplace netloc axi_gpio_1_GPIO2 1 3 1 NJ 400
+preplace netloc ps7_0_axi_periph_M02_AXI 1 2 1 980 480n
+preplace netloc ps7_0_axi_periph_M03_AXI 1 2 1 970 380n
+preplace netloc processing_system7_0_FIXED_IO 1 1 3 NJ 80 NJ 80 NJ
+preplace netloc processing_system7_0_IIC_0 1 1 3 NJ 100 NJ 100 NJ
+preplace netloc processing_system7_0_M_AXI_GP0 1 1 1 610 140n
+preplace netloc axi_gpio_1_GPIO 1 3 1 NJ 380
+preplace netloc ps7_0_axi_periph_M01_AXI 1 2 1 990 460n
+preplace netloc vga_controller_0_M_AXI 1 0 3 50 360 590J 270 920
+preplace netloc ps7_0_axi_periph_M00_AXI 1 2 1 930 440n
+preplace netloc ps7_0_axi_periph_M05_AXI 1 2 1 N 540
+levelinfo -pg 1 0 310 770 1120 1280
+pagesize -pg 1 -db -bbox -sgen -110 0 1410 1170
+"
+}
+{
+   "da_axi4_cnt":"4",
+   "da_board_cnt":"2",
+   "da_clkrst_cnt":"1",
+   "da_ps7_cnt":"1"
+}

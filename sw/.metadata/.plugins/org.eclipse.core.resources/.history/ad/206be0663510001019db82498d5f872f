@@ -1,0 +1,60 @@
+#ifndef __DISPLAY_H_
+#define __DISPLAY_H_
+
+#include <stdio.h>
+#include <xil_io.h>
+#include <sleep.h>
+#include <string.h>
+#include "xiicps.h"
+#include <xil_printf.h>
+#include <xparameters.h>
+#include "xgpio.h"
+#include "xuartps.h"
+#include "stdlib.h"
+#include "xparameters.h"
+
+#include "HW_clock.h" //for get_clock()
+
+#define NUM_BYTES_BUFFER 5242880
+
+typedef struct {
+	float temp;
+	int hum;
+	char condition[15];
+	char tempstr[5];
+} weatherData;
+
+weatherData weather;
+
+extern int * image_buffer_pointer;
+
+extern int * centre_image_ptr;
+extern int * down_image_ptr;
+extern int * left_image_ptr;
+extern int * right_image_ptr;
+extern int * up_image_ptr;
+
+int showTimeFlag;
+uint32_t font_colour;
+
+//extern int * sw0_image_ptr;
+extern int * time_image_ptr;
+extern int * curr_image_ptr;
+
+
+void write_char(int ascii, int startx, int starty, int *image_mask, int font_size);
+
+void write_string(char *c, int startx, int starty, int *base_mask, int *image_mask, int font_size);
+
+void displayImage(int * image_mask);
+
+void displayTime(int *base_mask, int * image_mask);
+
+void displayWeather(int *base_mask, int *image_mask);
+
+void weatherIcon(int startx, int starty, int *base_mask, int *image_mask);
+
+void displayDate(int *base_mask, int *image_mask);
+
+void chooseFontColour(int startx, int starty, int *base_mask);
+#endif

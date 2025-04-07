@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="FileSystemImportWizard">
+		<item key="WizardFileSystemResourceImportPage1.STORE_OVERWRITE_EXISTING_RESOURCES_ID" value="false"/>
+		<item key="WizardFileSystemResourceImportPage1.STORE_CREATE_CONTAINER_STRUCTURE_ID" value="false"/>
+		<list key="WizardFileSystemResourceImportPage1.STORE_SOURCE_NAMES_ID">
+			<item value="C:\Users\eitak\ENSC452\dmmc_v1\452_dmmc\sw\dmmc_app_core1\src"/>
+			<item value="C:\Users\eitak\ENSC452\dmmc_v1\452_dmmc\sw\dmmc_app_core0\src"/>
+			<item value="C:\Users\eitak\ENSC452\DMMC\core_0\src\DMMC"/>
+			<item value="C:\Users\eitak\ENSC452\MS4_ethernet\core_1\src"/>
+			<item value="C:\Users\eitak\ENSC452\MS4_ethernet\core_0\src"/>
+		</list>
+	</section>
+</section>

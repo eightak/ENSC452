@@ -1,0 +1,174 @@
+#include "timer.h"
+
+int count = 0;
+int reset = 7000000;
+const int freq2 = 50000000;
+
+void AXITimerInit(){
+
+	XTmrCtr_Initialize(&m_AxiTimer, XPAR_TMRCTR_0_DEVICE_ID);
+
+	m_timerClockFreq = (double) XPAR_AXI_TIMER_0_CLOCK_FREQ_HZ;
+	m_ClockPeriodSeconds = (double)(1/m_timerClockFreq);
+
+	m_tickcounter1 = 0;
+	m_tickcounter2 = 0;
+}
+
+void resetTimer(){
+	m_tickcounter1 = 0;
+	m_tickcounter2 = 0;
+}
+
+unsigned int startTimer(){
+	XTmrCtr_Reset(&m_AxiTimer, 0);
+	m_tickcounter1 = XTmrCtr_GetValue(&m_AxiTimer, 0);
+	XTmrCtr_Start(&m_AxiTimer, 0);
+	return m_tickcounter1;
+}
+
+unsigned int stopTimer(){
+	XTmrCtr_Stop(&m_AxiTimer, 0);
+	m_tickcounter2 = XTmrCtr_GetValue(&m_AxiTimer, 0);
+	return ((m_tickcounter2 - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getElapsedTimerInSeconds(){
+	return ((double) (XTmrCtr_GetValue(&m_AxiTimer, 0) - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getElapsedTimerInSecondsAfterTimerStop(){
+	return ((double) (m_tickcounter2 - m_tickcounter1) * m_ClockPeriodSeconds);
+}
+
+double getClockPeriod(){
+	return m_ClockPeriodSeconds;
+}
+
+
+void init_timer(int * background) {
+	if (switch_rising_edge) {
+		xil_printf("init timer..\n");
+		//Disable clock
+		showTimeFlag = 0;
+
+		//timerInt = -1;
+		secondsToTimeStr(0, timeStr, timeStrSize);
+		start = 0;
+		calculateTime(0);
+		chooseFontColour(550, 450, background);
+		//memcpy(image_buffer_pointer, left_image_pointer, NUM_BYTES_BUFFER);
+		write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+		displayImage(curr_image_ptr);
+		switch_rising_edge = 0;
+	}
+
+	if (button_pressed_flag) {
+		switch (btn_value) {
+			case CENTRE_BUTTON: // start/pause
+				if ((startTimerFlag == 0) && (setTimerValueInSeconds >= 10)) {
+					xil_printf("starting timer...\n");
+					startTimer();
+					timeElapsedInSeconds = 0;
+					startTimerFlag = 1;
+					xil_printf("Timer started for %d seconds\n", setTimerValueInSeconds);
+				}
+				else if (start) {
+					start = 0;
+					xil_printf("pausing timer...\n");
+					timeElapsedInSeconds = (unsigned int)stopTimer();
+					startTimerFlag = 0;
+					xil_printf("timeElapsedInSeconds = %d\n", timeElapsedInSeconds);
+				}
+				break;
+			case RIGHT_BUTTON: // Rest Timer
+				resetTimer();
+				setTimerValueInSeconds = 0;
+				calculateTime(0);
+				write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+				displayImage(curr_image_ptr);
+				xil_printf("Timer reset...\n");
+			case UP_BUTTON: //Increment 10 seconds
+				if (startTimerFlag == 0) {
+					setTimerValueInSeconds += 10;
+					xil_printf("Timer incremented = %d\n", setTimerValueInSeconds);
+
+					calculateTime(setTimerValueInSeconds);
+					write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+					displayImage(curr_image_ptr);
+				}
+				break;
+			case DOWN_BUTTON:
+				if ((startTimerFlag == 0) && (setTimerValueInSeconds >= 10)) {
+					setTimerValueInSeconds -= 10;
+					xil_printf("Timer decremented = %d\n", setTimerValueInSeconds);
+
+					calculateTime(setTimerValueInSeconds);
+					write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+					displayImage(curr_image_ptr);
+				}
+				break;
+		}
+	}
+	else if (switch_falling_edge) {
+		home_screen();
+		switch_falling_edge = 0;
+	}
+
+	timer(background);
+}
+
+void timer(int * background) {
+
+	int elapsed = 0;
+	button_pressed_flag = 0;
+
+	while (startTimerFlag && (setTimerValueInSeconds > 0)) {
+		elapsed++;
+		if (elapsed == freq2) { //1 sec has elapsed
+			xil_printf("TICK sent\n");
+			--timerInt;
+			calculateTime(timerInt);
+			write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
+			displayImage(curr_image_ptr);
+			elapsed = 0;
+			if (timerInt != 0) { //corner case
+				send_message_to_cpu1("TICK");
+			}
+		}
+
+		if (button_pressed_flag && btn_value == CENTRE_BUTTON) {
+			start = 0;
+			xil_printf("pausing...\n");
+			button_pressed_flag = 0;
+			break;
+		}
+
+		if (switch_falling_edge) {
+			home_screen();
+			switch_falling_edge = 0;
+			break;
+		}
+	}
+	if (timerInt == 0) {
+		send_message_to_cpu1("START BEEP"); //start beeping
+		while (!(button_pressed_flag && btn_value == CENTRE_BUTTON)) {
+			//stuck here (Beeping in cpu1)
+			if (switch_falling_edge) {
+				//xil_printf("falling edge detected in beep");
+				home_screen();
+				switch_falling_edge = 0;
+				break;
+			}
+		}
+		send_message_to_cpu1("STOP BEEP"); //stop beeping
+	}
+}
+
+void calculateTime(int starttime) {
+	int secs = starttime % 60;
+	int mins = secs / 60;
+
+	sprintf(timerChar, "%02d:%02d", mins, secs);
+	xil_printf("timer : %s\n", timerChar);
+}

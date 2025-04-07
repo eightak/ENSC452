@@ -1,0 +1,183 @@
+//Empty C++ Application
+#include <stdio.h>
+#include <string.h>
+#include "xil_types.h"
+#include "xparameters.h"
+#include "xgpio.h"
+#include "xil_io.h"
+#include "xil_exception.h"
+#include "xscugic.h"
+#include "xil_printf.h"
+//#include <cstdlib>
+#include "interrupts.h"
+#include "audio.h"
+//#include "display.h"
+
+#include "xil_cache.h"
+#include "shared_mem.h"
+#include "util.h"
+
+int Setup();
+void MainLoop();
+void audioSS();
+void beep();
+
+int main() {
+
+	Setup();
+	MainLoop();
+
+	return 0;
+}
+
+
+int Setup() {
+	//Setup Audio
+	IicConfig(XPAR_XIICPS_0_DEVICE_ID);
+
+	//Configure the Audio Codec's PLL
+	AudioPllConfig();
+
+	AudioConfigureJacks();
+
+	gpio_init();
+
+	music_index = 0;
+	track_number = 0;
+
+	MUSIC_ARRAY_OG->musicAddr[0] = (int *)0x10A7F000;
+	strcpy(MUSIC_ARRAY_OG->musicName[0], "A Bar Song");
+	strcpy(MUSIC_ARRAY_OG->musicArtist[0], "Shaboozey");
+	MUSIC_ARRAY_OG->musicSamples[0] = 2646000;
+
+
+	MUSIC_ARRAY_OG->musicAddr[1] = (int *)0x1147F000;
+	strcpy(MUSIC_ARRAY_OG->musicName[1], "Happy Like You");
+	strcpy(MUSIC_ARRAY_OG->musicArtist[1], "Empire Of The Sun");
+	MUSIC_ARRAY_OG->musicSamples[1] = 2646000;
+
+	MUSIC_ARRAY_OG->musicAddr[2] = (int *)0x11E7F000;
+	strcpy(MUSIC_ARRAY_OG->musicName[2], "Beautiful Things");
+	strcpy(MUSIC_ARRAY_OG->musicArtist[2], "Benson Boone");
+	MUSIC_ARRAY_OG->musicSamples[2] = 2646000;
+
+	MUSIC_ARRAY_OG->musicAddr[3] = (int *)0x1287F000;
+	strcpy(MUSIC_ARRAY_OG->musicName[3], "The Door");
+	strcpy(MUSIC_ARRAY_OG->musicArtist[3], "Teddy Swims");
+	MUSIC_ARRAY_OG->musicSamples[3] = 2646000;
+
+	MUSIC_ARRAY_OG->musicAddr[4] = (int *)0x1327F000;
+	strcpy(MUSIC_ARRAY_OG->musicName[4], "La La La");
+	strcpy(MUSIC_ARRAY_OG->musicArtist[4], "Naughty Boy (feat. Sam Smith)");
+	MUSIC_ARRAY_OG->musicSamples[4] = 2646000;
+
+	revertMusicToOriginalQueue(MUSIC_ARRAY_OG, MUSIC_ARRAY);
+
+	Xil_DCacheFlushRange((INTPTR)MUSIC_ARRAY_OG, sizeof(MusicStruct_OG));
+	Xil_DCacheFlushRange((INTPTR)MUSIC_ARRAY, sizeof(MusicStruct));
+
+	xil_printf("CPU1: Initialized\n");
+
+	return 0;
+
+}
+
+void MainLoop(){
+	int musicLoopFlag = 0;
+
+	while(1){
+
+		if (getTTSFlag_sharedMemory() == 1) {
+			audio_stream();
+		}
+
+		if (getVolumeControlFlag_sharedMemory() == 1) {
+			//xil_printf("increasing volume\n");
+			increaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+		else if (getVolumeControlFlag_sharedMemory() == 2) {
+			//xil_printf("decreasing volume\n");
+			decreaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+
+		if(getTimerRunningFlag_sharedMemory() && (getSW2Flag_sharedMemory() == 0)){
+			// Timer only
+			if (getPlayTimerTickFlag_sharedMemory()){
+				playTimerTickSound();
+				setPlayTimerTickFlag_sharedMemory(0);
+				//xil_printf("Core 1 Tick\r\n");
+			}
+			else if(getPlayTimerDoneFlag_sharedMemory()){
+				playTimerDoneSound();
+				//setPlayTimerDoneFlag_sharedMemory(0);
+				//setTimerRunningFlag_sharedMemory(0);
+				//xil_printf("Core 1 Beep\r\n");
+			}
+		}
+
+
+		else if (getSW2Flag_sharedMemory()){
+
+			// Music
+			//audio_stream();
+			music_index = 0;
+
+			if(getTimerRunningFlag_sharedMemory() && getPlayTimerDoneFlag_sharedMemory()){
+				playTimerDoneSound();
+				//setPlayTimerDoneFlag_sharedMemory(0);
+				//setTimerRunningFlag_sharedMemory(0);
+				//xil_printf("Core 1 Beep\r\n");
+			}
+
+			playMusic();
+
+			if (getTrackControl_sharedMemory() == 1) {
+				xil_printf("increment track\n");
+				track_number = incrementTrack(track_number);
+				music_index = 0;
+				setTrackControl_sharedMemory(0);
+			}
+			else if (getTrackControl_sharedMemory() == 2) {
+				xil_printf("decrement track\n");
+				track_number = decrementTrack(track_number);
+				music_index = 0;
+				setTrackControl_sharedMemory(0);
+			}
+			else {
+				switch(getMusicMode_sharedMemory()){
+					case 0: //normal
+						track_number = incrementTrack(track_number);
+						musicLoopFlag = 0;
+						break;
+
+					case 1: //loop once
+						if(musicLoopFlag == 0){
+							xil_printf("looping once\n");
+							track_number = track_number;
+							musicLoopFlag = 1;
+						}
+						else{
+							xil_printf("next track\n");
+							track_number = incrementTrack(track_number);
+							musicLoopFlag = 0;
+						}
+						break;
+
+					default: //loop forever
+						xil_printf("loop forever\n");
+						track_number = track_number;
+						musicLoopFlag = 0;
+						break;
+				}
+			}
+
+			setCurrentTrack_sharedMemory(track_number);
+
+		}
+		else {
+			track_number = 0;
+		}
+	}
+}

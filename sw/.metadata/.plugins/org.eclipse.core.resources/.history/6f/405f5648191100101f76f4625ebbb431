@@ -1,0 +1,90 @@
+#include "stopwatch.h"
+
+void init_stopwatch(int * background) {
+	xil_printf("init stopwatch\n");
+	swStartFlag = 0;
+	swRunningFlag = 0;
+	sw_timeElapsedInSeconds = 0;
+	sw_nextSecond = 0;
+	swSavedTime = 0;
+}
+void stopwatch(int * background) {
+	if (sw4_rising_edge) {
+		init_stopwatch(background);
+		sw4_rising_edge = 0;
+
+		showTimeFlag = 0;
+
+		calculateTime(0, swtimeStr);
+		chooseFontColour(550, 450, background);
+		write_string(swtimeStr, 550, 450, background, curr_image_ptr, 7);
+		displayImage(curr_image_ptr);
+		sw4_rising_edge = 0;
+	}
+
+    // Stop watch
+
+	 if(swStartFlag == 0  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 swSavedTime = 0;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+		 setTimerRunningFlag_sharedMemory(1);
+	 }
+
+	 if(swStartFlag == 1  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
+		 swStartFlag = 1;
+		 swRunningFlag = 1;
+		 startTimer();
+		 xil_printf("Stop watch started!\n");
+		 setTimerRunningFlag_sharedMemory(1);
+	 }
+
+	 if(swRunningFlag){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+	 }
+
+	 if(sw_timeElapsedInSeconds !=  sw_nextSecond){
+		 sw_nextSecond = sw_timeElapsedInSeconds;
+		 calculateTime(sw_timeElapsedInSeconds, swtimeStr);
+		 xil_printf("%s\n", swtimeStr);
+
+		 write_string(swtimeStr, 550, 450, background, curr_image_ptr, 7);
+		 displayImage(curr_image_ptr);
+		 // display sw
+		 setPlayTimerTickFlag_sharedMemory(1);
+	 }
+
+	 // stop/pause
+	 if(swRunningFlag && (XGpio_DiscreteRead(&BTNInst, 1) == LEFT_BUTTON)){
+		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
+		 swSavedTime += (unsigned int)stopTimer();
+		 resetTimer();
+		 swRunningFlag = 0;
+		 xil_printf("%s\n", swtimeStr);
+
+		 write_string(swtimeStr, 550, 450, background, curr_image_ptr, 7);
+		 displayImage(curr_image_ptr);
+		 setTimerRunningFlag_sharedMemory(1);
+	 }
+
+	 //reset
+	 if(swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == CENTRE_BUTTON)){
+		 resetTimer();
+		 swRunningFlag = 0;
+		 swStartFlag = 0;
+		 swSavedTime = 0;
+		 calculateTime(0, swtimeStr);
+
+		 write_string(swtimeStr, 550, 450, background, curr_image_ptr, 7);
+		 displayImage(curr_image_ptr);
+	 }
+
+	if (switch_falling_edge) {
+		home_screen();
+		switch_falling_edge = 0;
+		setTimerRunningFlag_sharedMemory(0);
+		setPlayTimerTickFlag_sharedMemory(0);
+	}
+}

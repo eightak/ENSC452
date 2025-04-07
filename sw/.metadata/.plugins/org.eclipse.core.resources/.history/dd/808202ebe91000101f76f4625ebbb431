@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <string.h>
+#include "xparameters.h"
+#include "random_num_gen_ip.h"
+#include "xil_io.h"
+#include "shared_memory.h"
+#include "util.h"
+
+void getMusicModeStr(char * charValue, int value){
+	switch(value){
+	case 1:
+		strcpy(charValue, "Repeat Once");
+		break;
+	case 2:
+		strcpy(charValue, "Repeat");
+		break;
+	default:
+		strcpy(charValue, "");
+		break;
+	}
+}

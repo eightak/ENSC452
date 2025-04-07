@@ -1,0 +1,19 @@
+verilog xil_defaultlib --include "C:/Xilinx/Vivado/2020.2/data/xilinx_vip/include" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/ec67/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/34f8/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/d0f7" \
+"../../../bd/dmm_design/ip/dmm_design_processing_system7_0_0/sim/dmm_design_processing_system7_0_0.v" \
+
+verilog fifo_generator_v13_2_5 --include "C:/Xilinx/Vivado/2020.2/data/xilinx_vip/include" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/ec67/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/34f8/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/d0f7" \
+"../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/276e/simulation/fifo_generator_vlog_beh.v" \
+"../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/276e/hdl/fifo_generator_v13_2_rfs.v" \
+
+verilog xil_defaultlib --include "C:/Xilinx/Vivado/2020.2/data/xilinx_vip/include" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/ec67/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/34f8/hdl" --include "../../../../dmm.gen/sources_1/bd/dmm_design/ipshared/d0f7" \
+"../../../bd/dmm_design/ip/dmm_design_xbar_0/sim/dmm_design_xbar_0.v" \
+"../../../bd/dmm_design/ip/fifo_generator_0/sim/fifo_generator_0.v" \
+"../../../bd/dmm_design/ip/dmm_design_clk_wiz_0_0/dmm_design_clk_wiz_0_0_clk_wiz.v" \
+"../../../bd/dmm_design/ip/dmm_design_clk_wiz_0_0/dmm_design_clk_wiz_0_0.v" \
+"../../../bd/dmm_design/ip/dmm_design_xlconcat_0_0/sim/dmm_design_xlconcat_0_0.v" \
+"../../../bd/dmm_design/ip/dmm_design_auto_pc_0/sim/dmm_design_auto_pc_0.v" \
+"../../../bd/dmm_design/ip/dmm_design_auto_cc_0/sim/dmm_design_auto_cc_0.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+nosort

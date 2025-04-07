@@ -1,0 +1,10 @@
+
+
+OPTION psf_version = 2.1;
+
+BEGIN DRIVER global_clk
+	OPTION supported_peripherals = (global_clk);
+	OPTION copyfiles = all;
+	OPTION VERSION = 1.0;
+	OPTION NAME = global_clk;
+END DRIVER

@@ -1,0 +1,373 @@
+/*
+ * audio.c
+ *
+ *  Contains all of the functions related to audio codec setup.
+ */
+
+#include "audio.h"
+
+u32  in_left_global[SAMPLE_SIZE];
+u32  in_right_global[SAMPLE_SIZE];
+int stop_counter = -1;
+
+int * beep_sound = (int *)0x10980000;
+int * tick_sound = (int *)0x109FF800;
+int * music1_sound = (int *)0x10A7F000;
+
+static inline int32_t saturateToInt32(int64_t value);
+void tick_and_music();
+
+/* ---------------------------------------------------------------------------- *
+ * 									IicConfig()									*
+ * ---------------------------------------------------------------------------- *
+ * Initialises the IIC driver by looking up the configuration in the config
+ * table and then initialising it. Also sets the IIC serial clock rate.
+ * ---------------------------------------------------------------------------- */
+unsigned char IicConfig(unsigned int DeviceIdPS)
+{
+	XIicPs_Config *Config;
+	int Status;
+
+	/* Initialise the IIC driver so that it's ready to use */
+
+	// Look up the configuration in the config table
+	Config = XIicPs_LookupConfig(DeviceIdPS);
+	if(NULL == Config) {
+		return XST_FAILURE;
+	}
+
+	// Initialise the IIC driver configuration
+	Status = XIicPs_CfgInitialize(&Iic, Config, Config->BaseAddress);
+	if(Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	//Set the IIC serial clock rate.
+	XIicPs_SetSClk(&Iic, IIC_SCLK_RATE);
+
+	return XST_SUCCESS;
+}
+
+/* ---------------------------------------------------------------------------- *
+ * 								AudioPllConfig()								*
+ * ---------------------------------------------------------------------------- *
+ * Configures audio codes's internal PLL. With MCLK = 10 MHz it configures the
+ * PLL for a VCO frequency = 49.152 MHz, and an audio sample rate of 48 KHz.
+ * ---------------------------------------------------------------------------- */
+void AudioPllConfig() {
+
+	unsigned char u8TxData[8], u8RxData[6];
+	int Status;
+
+	Status = IicConfig(XPAR_XIICPS_0_DEVICE_ID);
+	if(Status != XST_SUCCESS) {
+		xil_printf("\nError initializing IIC");
+
+	}
+
+	// Disable Core Clock
+	AudioWriteToReg(R0_CLOCK_CONTROL, 0x0E);
+
+	/* 	MCLK = 10 MHz
+		R = 0100 = 4, N = 0x02 0x3C = 572, M = 0x02 0x71 = 625
+
+		PLL required output = 1024x48 KHz
+		(PLLout)			= 49.152 MHz
+
+		PLLout/MCLK			= 49.152 MHz/10 MHz
+							= 4.9152 MHz
+							= R + (N/M)
+							= 4 + (572/625) */
+
+	// Write 6 bytes to R1 @ register address 0x4002
+	u8TxData[0] = 0x40; // Register write address [15:8]
+	u8TxData[1] = 0x02; // Register write address [7:0]
+	u8TxData[2] = 0x02; // byte 6 - M[15:8]
+	u8TxData[3] = 0x71; // byte 5 - M[7:0]
+	u8TxData[4] = 0x02; // byte 4 - N[15:8]
+	u8TxData[5] = 0x3C; // byte 3 - N[7:0]
+	u8TxData[6] = 0x21; // byte 2 - 7 = reserved, bits 6:3 = R[3:0], 2:1 = X[1:0], 0 = PLL operation mode
+	u8TxData[7] = 0x01; // byte 1 - 7:2 = reserved, 1 = PLL Lock, 0 = Core clock enable
+
+	// Write bytes to PLL Control register R1 @ 0x4002
+	XIicPs_MasterSendPolled(&Iic, u8TxData, 8, (IIC_SLAVE_ADDR >> 1));
+	while(XIicPs_BusIsBusy(&Iic));
+
+	// Register address set: 0x4002
+	u8TxData[0] = 0x40;
+	u8TxData[1] = 0x02;
+
+	// Poll PLL Lock bit
+	do {
+		XIicPs_MasterSendPolled(&Iic, u8TxData, 2, (IIC_SLAVE_ADDR >> 1));
+		while(XIicPs_BusIsBusy(&Iic));
+		XIicPs_MasterRecvPolled(&Iic, u8RxData, 6, (IIC_SLAVE_ADDR >> 1));
+		while(XIicPs_BusIsBusy(&Iic));
+	}
+	while((u8RxData[5] & 0x02) == 0); // while not locked
+
+	AudioWriteToReg(R0_CLOCK_CONTROL, 0x0F);	// 1111
+												// bit 3:		CLKSRC = PLL Clock input
+												// bits 2:1:	INFREQ = 1024 x fs
+												// bit 0:		COREN = Core Clock enabled
+}
+
+
+/* ---------------------------------------------------------------------------- *
+ * 								AudioWriteToReg									*
+ * ---------------------------------------------------------------------------- *
+ * Function to write one byte (8-bits) to one of the registers from the audio
+ * controller.
+ * ---------------------------------------------------------------------------- */
+void AudioWriteToReg(unsigned char u8RegAddr, unsigned char u8Data) {
+
+	unsigned char u8TxData[3];
+
+	u8TxData[0] = 0x40;
+	u8TxData[1] = u8RegAddr;
+	u8TxData[2] = u8Data;
+
+	XIicPs_MasterSendPolled(&Iic, u8TxData, 3, (IIC_SLAVE_ADDR >> 1));
+	while(XIicPs_BusIsBusy(&Iic));
+}
+
+/* ---------------------------------------------------------------------------- *
+ * 								AudioConfigureJacks()							*
+ * ---------------------------------------------------------------------------- *
+ * Configures audio codes's various mixers, ADC's, DAC's, and amplifiers to
+ * accept stereo input from line in and push stereo output to line out.
+ * ---------------------------------------------------------------------------- */
+void AudioConfigureJacks()
+{
+	AudioWriteToReg(R4_RECORD_MIXER_LEFT_CONTROL_0, 0x01); //enable mixer 1
+	AudioWriteToReg(R5_RECORD_MIXER_LEFT_CONTROL_1, 0x07); //unmute Left channel of line in into mxr 1 and set gain to 6 db
+	AudioWriteToReg(R6_RECORD_MIXER_RIGHT_CONTROL_0, 0x01); //enable mixer 2
+	AudioWriteToReg(R7_RECORD_MIXER_RIGHT_CONTROL_1, 0x07); //unmute Right channel of line in into mxr 2 and set gain to 6 db
+	AudioWriteToReg(R19_ADC_CONTROL, 0x13); //enable ADCs
+
+	AudioWriteToReg(R22_PLAYBACK_MIXER_LEFT_CONTROL_0, 0x21); //unmute Left DAC into Mxr 3; enable mxr 3
+	AudioWriteToReg(R24_PLAYBACK_MIXER_RIGHT_CONTROL_0, 0x41); //unmute Right DAC into Mxr4; enable mxr 4
+	AudioWriteToReg(R26_PLAYBACK_LR_MIXER_LEFT_LINE_OUTPUT_CONTROL, 0x05); //unmute Mxr3 into Mxr5 and set gain to 6db; enable mxr 5
+	AudioWriteToReg(R27_PLAYBACK_LR_MIXER_RIGHT_LINE_OUTPUT_CONTROL, 0x11); //unmute Mxr4 into Mxr6 and set gain to 6db; enable mxr 6
+	AudioWriteToReg(R29_PLAYBACK_HEADPHONE_LEFT_VOLUME_CONTROL, 0xFF);//Mute Left channel of HP port (LHP)
+	AudioWriteToReg(R30_PLAYBACK_HEADPHONE_RIGHT_VOLUME_CONTROL, 0xFF); //Mute Right channel of HP port (LHP)
+	AudioWriteToReg(R31_PLAYBACK_LINE_OUTPUT_LEFT_VOLUME_CONTROL, 0xE6); //set LOUT volume (0db); unmute left channel of Line out port; set Line out port to line out mode
+	AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, 0xE6); // set ROUT volume (0db); unmute right channel of Line out port; set Line out port to line out mode
+	//AudioWriteToReg(R31_PLAYBACK_LINE_OUTPUT_LEFT_VOLUME_CONTROL, 0xFE); //set LOUT volume (0db); unmute left channel of Line out port; set Line out port to line out mode
+	//AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, 0xFE); // set ROUT volume (0db); unmute right channel of Line out port; set Line out port to line out mode
+	AudioWriteToReg(R35_PLAYBACK_POWER_MANAGEMENT, 0x03); //enable left and right channel playback (not sure exactly what this does...)
+	AudioWriteToReg(R36_DAC_CONTROL_0, 0x03); //enable both DACs
+
+	AudioWriteToReg(R58_SERIAL_INPUT_ROUTE_CONTROL, 0x01); //Connect I2S serial port output (SDATA_O) to DACs
+	AudioWriteToReg(R59_SERIAL_OUTPUT_ROUTE_CONTROL, 0x01); //connect I2S serial port input (SDATA_I) to ADCs
+
+	AudioWriteToReg(R65_CLOCK_ENABLE_0, 0x7F); //Enable clocks
+	AudioWriteToReg(R66_CLOCK_ENABLE_1, 0x03); //Enable rest of clocks
+}
+
+/* ---------------------------------------------------------------------------- *
+ * 								LineinLineoutConfig()							*
+ * ---------------------------------------------------------------------------- *
+ * Configures Line-In input, ADC's, DAC's, Line-Out and HP-Out.
+ * ---------------------------------------------------------------------------- */
+void LineinLineoutConfig() {
+
+	AudioWriteToReg(R17_CONVERTER_CONTROL_0, 0x05);//48 KHz
+	AudioWriteToReg(R64_SERIAL_PORT_SAMPLING_RATE, 0x05);//48 KHz
+	AudioWriteToReg(R19_ADC_CONTROL, 0x13);
+	AudioWriteToReg(R36_DAC_CONTROL_0, 0x03);
+	AudioWriteToReg(R35_PLAYBACK_POWER_MANAGEMENT, 0x03);
+	AudioWriteToReg(R58_SERIAL_INPUT_ROUTE_CONTROL, 0x01);
+	AudioWriteToReg(R59_SERIAL_OUTPUT_ROUTE_CONTROL, 0x01);
+	AudioWriteToReg(R65_CLOCK_ENABLE_0, 0x7F);
+	AudioWriteToReg(R66_CLOCK_ENABLE_1, 0x03);
+
+	AudioWriteToReg(R4_RECORD_MIXER_LEFT_CONTROL_0, 0x01);
+	AudioWriteToReg(R5_RECORD_MIXER_LEFT_CONTROL_1, 0x05);//0 dB gain
+	AudioWriteToReg(R6_RECORD_MIXER_RIGHT_CONTROL_0, 0x01);
+	AudioWriteToReg(R7_RECORD_MIXER_RIGHT_CONTROL_1, 0x05);//0 dB gain
+
+	AudioWriteToReg(R22_PLAYBACK_MIXER_LEFT_CONTROL_0, 0x21);
+	AudioWriteToReg(R24_PLAYBACK_MIXER_RIGHT_CONTROL_0, 0x41);
+	AudioWriteToReg(R26_PLAYBACK_LR_MIXER_LEFT_LINE_OUTPUT_CONTROL, 0x03);//0 dB
+	AudioWriteToReg(R27_PLAYBACK_LR_MIXER_RIGHT_LINE_OUTPUT_CONTROL, 0x09);//0 dB
+	AudioWriteToReg(R29_PLAYBACK_HEADPHONE_LEFT_VOLUME_CONTROL, 0xE7);//0 dB
+	AudioWriteToReg(R30_PLAYBACK_HEADPHONE_RIGHT_VOLUME_CONTROL, 0xE7);//0 dB
+	AudioWriteToReg(R31_PLAYBACK_LINE_OUTPUT_LEFT_VOLUME_CONTROL, 0xE6);//0 dB
+	AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, 0xE6);//0 dB
+}
+
+unsigned char gpio_init()
+{
+	int Status;
+
+	Status = XGpio_Initialize(&Gpio, BUTTON_SWITCH_ID);
+	if(Status != XST_SUCCESS) return XST_FAILURE;
+
+	XGpio_SetDataDirection(&Gpio, SWITCH_CHANNEL, 0xFF);
+	XGpio_SetDataDirection(&Gpio, BUTTON_CHANNEL, 0xFF);
+
+	return XST_SUCCESS;
+}
+
+void audio_stream(){
+	//xil_printf("audio_stream\n");
+	u32  in_left, in_right;
+
+
+	//while (sw2_bit && (getTimerRunningFlag_sharedMemory() == 0) && (getPlayTimerDoneFlag_sharedMemory() == 0)){
+
+	// Read audio input from codec
+	in_left = Xil_In32(I2S_DATA_RX_L_REG);
+	in_right = Xil_In32(I2S_DATA_RX_R_REG);
+
+
+	// Write audio output to codec
+	Xil_Out32(I2S_DATA_TX_L_REG, in_left);
+	Xil_Out32(I2S_DATA_TX_R_REG, in_right);
+
+
+	//}
+
+} // audio_stream()
+
+
+void play_sound_effect(uint32_t se){
+
+	Xil_Out32(I2S_DATA_TX_L_REG, se);
+	Xil_Out32(I2S_DATA_TX_R_REG, se);
+
+	usleep(NORMAL_PLAYBACK);
+}
+
+static unsigned char volumeLevel = 0xE6;
+
+void increaseVolume() {
+	if (volumeLevel <= (MAX_VOLUME - VOLUME_STEP)) {
+		volumeLevel += VOLUME_STEP;
+	}
+	else {
+		volumeLevel = MAX_VOLUME;
+	}
+
+	AudioWriteToReg(R31_PLAYBACK_LINE_OUTPUT_LEFT_VOLUME_CONTROL, volumeLevel);
+	AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, volumeLevel);
+	xil_printf("Volume increased => %x\n", volumeLevel);
+}
+
+void decreaseVolume() {
+	if (volumeLevel >= (MIN_VOLUME + VOLUME_STEP)) {
+		volumeLevel -= VOLUME_STEP;
+	}
+	else {
+		volumeLevel = MIN_VOLUME;
+	}
+
+	AudioWriteToReg(R31_PLAYBACK_LINE_OUTPUT_LEFT_VOLUME_CONTROL, volumeLevel);
+	AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, volumeLevel);
+	xil_printf("Volume decreased => %x\n", volumeLevel);
+}
+
+void playTimerDoneSound(){
+	for (int i = 0; i < BEEP_SAMPLES; i++) {
+		play_sound_effect((uint32_t)*(beep_sound + i));
+	}
+	usleep(10000);
+}
+
+
+void playTimerTickSound(){
+	for (int i = 0; i < TICK_SAMPLES; i++) {
+		play_sound_effect((uint32_t)*(tick_sound + i));
+	}
+}
+
+
+
+static inline int32_t saturateToInt32(int64_t value){
+	// Function to clamp values to 32-bit signed range
+    if (value > INT32_MAX) return INT32_MAX;
+    if (value < INT32_MIN) return INT32_MIN;
+    return (int32_t)value;
+}
+
+void playTimerTickSoundWithMusic(){
+	xil_printf("playTimerTickSoundWithMusic\n");
+    for (int i = 0; i < TICK_SAMPLES*10; i++) {
+        // Read incoming audio sample
+        int32_t in_left = (int32_t)Xil_In32(I2S_DATA_RX_L_REG);
+        int32_t in_right = (int32_t)Xil_In32(I2S_DATA_RX_R_REG);
+
+        // Mix tick sound (assuming tick_sound is signed 8-bit PCM)
+        int32_t tick_sample = (int32_t)tick_sound[(int)(i/10)]; // Convert to int32_t for safe addition
+
+        int32_t new_left = saturateToInt32((int64_t)in_left+ tick_sample);// + tick_sample
+        int32_t new_right = saturateToInt32((int64_t)in_right+ tick_sample );//+ tick_sample
+
+        // Write back modified audio sample
+        Xil_Out32(I2S_DATA_TX_L_REG, (uint32_t)new_left);
+        Xil_Out32(I2S_DATA_TX_R_REG, (uint32_t)new_right);
+
+        // Delay to match playback rate
+        //usleep(NORMAL_PLAYBACK);
+    }
+}
+
+void play_music_and_tick(uint32_t se1, uint32_t se2){
+
+	Xil_Out32(I2S_DATA_TX_L_REG, se1 + se2);
+	Xil_Out32(I2S_DATA_TX_R_REG, se1 + se2);
+
+	usleep(NORMAL_PLAYBACK);
+}
+
+void playMusic(){
+
+	xil_printf("Playing: %s\n", MUSIC_ARRAY->musicName[track_number]);
+	int music_samples = MUSIC_ARRAY->musicSamples[track_number];
+	int *musicPtr = MUSIC_ARRAY->musicAddr[track_number];
+
+	while((music_index < music_samples) && getSW2Flag_sharedMemory() && (getPlayTimerDoneFlag_sharedMemory() == 0)){
+
+		if (getTrackControl_sharedMemory() != 0) {
+			break;
+		}
+
+		if (getVolumeControlFlag_sharedMemory() == 1) {
+			//xil_printf("increasing volume\n");
+			increaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+		else if (getVolumeControlFlag_sharedMemory() == 2) {
+			//xil_printf("decreasing volume\n");
+			decreaseVolume();
+			setVolumeControlFlag_sharedMemory(0);
+		}
+
+		if(getTimerRunningFlag_sharedMemory() && getPlayTimerTickFlag_sharedMemory()){
+			tick_and_music();
+		}
+		else{
+			play_sound_effect((uint32_t)*(musicPtr + music_index));
+			music_index++;
+		}
+	}
+}
+
+void tick_and_music(){
+	xil_printf("Playing: %s\n", MUSIC_ARRAY->musicName[track_number]);
+	int *music_ptr = MUSIC_ARRAY->musicAddr[track_number];
+
+	xil_printf("Timer tick + music\n");
+	for(int tick_index = 0; tick_index < TICK_SAMPLES; tick_index++){
+		play_music_and_tick((uint32_t)*(music_ptr + music_index), (uint32_t)*(tick_sound + tick_index));
+		setPlayTimerTickFlag_sharedMemory(0);
+		music_index++;
+	}
+}
+
+void playMusicTest(){
+	for (int i = 0; i < MUSIC1_SAMPLES; i++) {
+		play_sound_effect((uint32_t)*(music1_sound + i));
+	}
+}
