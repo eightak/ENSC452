@@ -6,20 +6,34 @@
 #include "shared_mem.h"
 #include "util.h"
 
+/* Redefine audio controller base address from random_num_gen_ip.h*/
 #define RAND_NUM_BASE XPAR_RANDOM_NUM_GEN_IP_0_S00_AXI_BASEADDR
 
+
+/* ---------------------------------------------------------------------------- *
+ * 	                             random_number()                                *
+ * ---------------------------------------------------------------------------- *
+ * Function to get the random number fromthe hardware
+ * ---------------------------------------------------------------------------- */
 int random_number() {
 	return (RANDOM_NUM_GEN_IP_mReadReg(RAND_NUM_BASE, 0) % 511) + 1;  // Returns a random number between 1 and 511
 }
 
 
+/* ---------------------------------------------------------------------------- *
+ * 	                   shuffleMusicArray(MusicStruct * ms)                      *
+ * ---------------------------------------------------------------------------- *
+ * Function to shuffle the music queue in a random order. 
+ * Uses the Fisher-Yates Shuffle algorithm with the help of the random number 
+ * generated from the hardware.
+ * ---------------------------------------------------------------------------- */
 void shuffleMusicArray(MusicStruct * ms) {
     for (int i = NUM_MUSIC_TRACKS - 1; i > 0; i--) {
         int j = random_number() % (i + 1); // Get a random index within bounds
         xil_printf("Random Number => %d\n", j);
         // Swap arr[i] and arr[j]
 
-        // save ato temp
+        // save to temp
         int * tempAddr = ms->musicAddr[i];
         char tempName[CHAR_SIZE];
         char tempArtist[CHAR_SIZE];
@@ -45,6 +59,12 @@ void shuffleMusicArray(MusicStruct * ms) {
     }
 }
 
+
+/* ---------------------------------------------------------------------------- *
+ * 	                         incrementTrack(int value)	                         *
+ * ---------------------------------------------------------------------------- *
+ * Function to increment the track within bounds
+ * ---------------------------------------------------------------------------- */
 int incrementTrack(int value){
 	if (value < NUM_MUSIC_TRACKS-1){
 		value++;
@@ -55,6 +75,11 @@ int incrementTrack(int value){
 	return value;
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 	                         decrementTrack(int value)	                         *
+ * ---------------------------------------------------------------------------- *
+ * Function to decrement the track within bounds
+ * ---------------------------------------------------------------------------- */
 int decrementTrack(int value){
     if (value > 0){
         value--;
@@ -65,6 +90,11 @@ int decrementTrack(int value){
     return value;
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 	    revertMusicToOriginalQueue(MusicStruct_OG * ms_og, MusicStruct * ms)	*
+ * ---------------------------------------------------------------------------- *
+ * Function to revert the music queue from the shuffled to the original order
+ * ---------------------------------------------------------------------------- */
 void revertMusicToOriginalQueue(MusicStruct_OG * ms_og, MusicStruct * ms){
 	for(int i = 0; i < NUM_MUSIC_TRACKS; i++){
 		ms->musicAddr[i] = ms_og->musicAddr[i];

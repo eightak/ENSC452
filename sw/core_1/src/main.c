@@ -1,4 +1,4 @@
-//Empty C++ Application
+
 #include <stdio.h>
 #include <string.h>
 #include "xil_types.h"
@@ -8,20 +8,19 @@
 #include "xil_exception.h"
 #include "xscugic.h"
 #include "xil_printf.h"
-//#include <cstdlib>
 #include "interrupts.h"
 #include "audio.h"
-//#include "display.h"
-
 #include "xil_cache.h"
 #include "shared_mem.h"
 #include "util.h"
 
+// Function Prototypes
 int Setup();
 void MainLoop();
 void audioSS();
 void beep();
 
+// Main function
 int main() {
 
 	Setup();
@@ -30,7 +29,7 @@ int main() {
 	return 0;
 }
 
-
+// Performs all the necessary setups for this core
 int Setup() {
 	//Setup Audio
 	IicConfig(XPAR_XIICPS_0_DEVICE_ID);
@@ -45,6 +44,7 @@ int Setup() {
 	music_index = 0;
 	track_number = 0;
 
+	// Initialise with music addresses in the memory
 	MUSIC_ARRAY_OG->musicAddr[0] = (int *)0x10A7F000;
 	strcpy(MUSIC_ARRAY_OG->musicName[0], "A Bar Song");
 	strcpy(MUSIC_ARRAY_OG->musicArtist[0], "Shaboozey");
@@ -71,6 +71,7 @@ int Setup() {
 	strcpy(MUSIC_ARRAY_OG->musicArtist[4], "Naughty Boy (feat. Sam Smith)");
 	MUSIC_ARRAY_OG->musicSamples[4] = 2646000;
 
+	// Sets the original music queue
 	revertMusicToOriginalQueue(MUSIC_ARRAY_OG, MUSIC_ARRAY);
 
 	Xil_DCacheFlushRange((INTPTR)MUSIC_ARRAY_OG, sizeof(MusicStruct_OG));
@@ -82,100 +83,86 @@ int Setup() {
 
 }
 
+// This function has the overall logic of the core
 void MainLoop(){
+	// Flag for music loop
 	int musicLoopFlag = 0;
 
 	while(1){
-
+		// Checks and plats Text-to_Speech
 		if (getTTSFlag_sharedMemory() == 1) {
 			audio_stream();
 		}
-
+		// Checks and increments/decrements volume
 		if (getVolumeControlFlag_sharedMemory() == 1) {
-			//xil_printf("increasing volume\n");
 			increaseVolume();
 			setVolumeControlFlag_sharedMemory(0);
 		}
 		else if (getVolumeControlFlag_sharedMemory() == 2) {
-			//xil_printf("decreasing volume\n");
 			decreaseVolume();
 			setVolumeControlFlag_sharedMemory(0);
 		}
 
 		if(getTimerRunningFlag_sharedMemory() && (getSW2Flag_sharedMemory() == 0)){
-			// Timer only
+			// Checks and plays timer tick or done sounds when the timer is running
 			if (getPlayTimerTickFlag_sharedMemory()){
 				playTimerTickSound();
 				setPlayTimerTickFlag_sharedMemory(0);
-				//xil_printf("Core 1 Tick\r\n");
+
 			}
 			else if(getPlayTimerDoneFlag_sharedMemory()){
 				playTimerDoneSound();
-				//setPlayTimerDoneFlag_sharedMemory(0);
-				//setTimerRunningFlag_sharedMemory(0);
-				//xil_printf("Core 1 Beep\r\n");
 			}
 		}
 
 
 		else if (getSW2Flag_sharedMemory()){
 
-			//track_number = getCurrentTrack_sharedMemory();
-
-			// Music
-			//audio_stream();
 			music_index = 0;
-
+			// Checks if the timer done sounds needs to played
 			if(getTimerRunningFlag_sharedMemory() && getPlayTimerDoneFlag_sharedMemory()){
 				playTimerDoneSound();
-				//setPlayTimerDoneFlag_sharedMemory(0);
-				//setTimerRunningFlag_sharedMemory(0);
-				//xil_printf("Core 1 Beep\r\n");
 			}
 
+			// Plays music
 			playMusic();
 
+			// Increments or decrements track number 
 			if (getTrackControl_sharedMemory() == 1) {
-				//xil_printf("increment track\n");
 				track_number = incrementTrack(track_number);
 				music_index = 0;
 				setTrackControl_sharedMemory(0);
 			}
 			else if (getTrackControl_sharedMemory() == 2) {
-				//xil_printf("decrement track\n");
 				track_number = decrementTrack(track_number);
 				music_index = 0;
 				setTrackControl_sharedMemory(0);
 			}
 			else {
 				switch(getMusicMode_sharedMemory()){
-					case 0: //normal
-						//xil_printf("normal\n");
+					case 0: //normal mode
+					
 						track_number = incrementTrack(track_number);
 						musicLoopFlag = 0;
 						break;
 
 					case 1: //loop once
 						if(musicLoopFlag == 0){
-							//xil_printf("looping once\n");
-							//track_number = track_number;
 							musicLoopFlag = 1;
 						}
 						else{
-							//xil_printf("next track\n");
+
 							track_number = incrementTrack(track_number);
 							musicLoopFlag = 0;
 						}
 						break;
 
 					default: //loop forever
-						//xil_printf("loop forever\n");
-						//track_number = track_number;
 						musicLoopFlag = 0;
 						break;
 				}
 			}
-
+			// Sets the current track number in the shared memory
 			setCurrentTrack_sharedMemory(track_number);
 
 		}

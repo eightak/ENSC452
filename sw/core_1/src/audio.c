@@ -1,7 +1,8 @@
 /*
  * audio.c
  *
- *  Contains all of the functions related to audio codec setup.
+ *  Contains all of the functions related to audio codec initlizations.
+ * 	Contains all the funtions to play music and sounds
  */
 
 #include "audio.h"
@@ -10,11 +11,14 @@ u32  in_left_global[SAMPLE_SIZE];
 u32  in_right_global[SAMPLE_SIZE];
 int stop_counter = -1;
 
+// Memory addresses of the timer sounds 
 int * beep_sound = (int *)0x10980000;
 int * tick_sound = (int *)0x109FF800;
-//int * music1_sound = (int *)0x10A7F000;
 
-static inline int32_t saturateToInt32(int64_t value);
+// For volume control and initialized with the volume level
+static unsigned char volumeLevel = 0xE6;
+
+// Function prototypes
 void tick_and_music();
 
 /* ---------------------------------------------------------------------------- *
@@ -197,6 +201,11 @@ void LineinLineoutConfig() {
 	AudioWriteToReg(R32_PLAYBACK_LINE_OUTPUT_RIGHT_VOLUME_CONTROL, 0xE6);//0 dB
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 								gpio_init()										*
+ * ---------------------------------------------------------------------------- *
+ * Configures GPIO and sets the direction of the GPIO 
+ * ---------------------------------------------------------------------------- */
 unsigned char gpio_init()
 {
 	int Status;
@@ -210,12 +219,14 @@ unsigned char gpio_init()
 	return XST_SUCCESS;
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 									audio_stream()								*
+ * ---------------------------------------------------------------------------- *
+ * Function to stream audio from the host PC
+ * ---------------------------------------------------------------------------- */
 void audio_stream(){
-	//xil_printf("audio_stream\n");
+
 	u32  in_left, in_right;
-
-
-	//while (sw2_bit && (getTimerRunningFlag_sharedMemory() == 0) && (getPlayTimerDoneFlag_sharedMemory() == 0)){
 
 	// Read audio input from codec
 	in_left = Xil_In32(I2S_DATA_RX_L_REG);
@@ -227,11 +238,16 @@ void audio_stream(){
 	Xil_Out32(I2S_DATA_TX_R_REG, in_right);
 
 
-	//}
-
-} // audio_stream()
 
 
+} 
+
+
+/* ---------------------------------------------------------------------------- *
+ * 								play_sound_effect(uint32_t se)					*
+ * ---------------------------------------------------------------------------- *
+ * Plays the sound in left & right channel of the audio
+ * ---------------------------------------------------------------------------- */
 void play_sound_effect(uint32_t se){
 
 	Xil_Out32(I2S_DATA_TX_L_REG, se);
@@ -240,8 +256,12 @@ void play_sound_effect(uint32_t se){
 	usleep(NORMAL_PLAYBACK);
 }
 
-static unsigned char volumeLevel = 0xE6;
 
+/* ---------------------------------------------------------------------------- *
+ * 								increaseVolume()								*
+ * ---------------------------------------------------------------------------- *
+ * Increases the volume level within bounds
+ * ---------------------------------------------------------------------------- */
 void increaseVolume() {
 	if (volumeLevel <= (MAX_VOLUME - VOLUME_STEP)) {
 		volumeLevel += VOLUME_STEP;
@@ -255,6 +275,12 @@ void increaseVolume() {
 	xil_printf("Volume increased => %x\n", volumeLevel);
 }
 
+
+/* ---------------------------------------------------------------------------- *
+ * 								decreaseVolume()								*
+ * ---------------------------------------------------------------------------- *
+ * Decreases the volume level within bounds
+ * ---------------------------------------------------------------------------- */
 void decreaseVolume() {
 	if (volumeLevel >= (MIN_VOLUME + VOLUME_STEP)) {
 		volumeLevel -= VOLUME_STEP;
@@ -268,6 +294,11 @@ void decreaseVolume() {
 	xil_printf("Volume decreased => %x\n", volumeLevel);
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 								playTimerDoneSound()							*
+ * ---------------------------------------------------------------------------- *
+ * Plays the timer done sound with the timer is done
+ * ---------------------------------------------------------------------------- */
 void playTimerDoneSound(){
 	for (int i = 0; i < BEEP_SAMPLES; i++) {
 		play_sound_effect((uint32_t)*(beep_sound + i));
@@ -275,103 +306,69 @@ void playTimerDoneSound(){
 	usleep(10000);
 }
 
-
+/* ---------------------------------------------------------------------------- *
+ * 								playTimerTickSound()							*
+ * ---------------------------------------------------------------------------- *
+ * Plays the timer ticking sound with the timer is running
+ * ---------------------------------------------------------------------------- */
 void playTimerTickSound(){
 	for (int i = 0; i < TICK_SAMPLES; i++) {
 		play_sound_effect((uint32_t)*(tick_sound + i));
 	}
 }
 
-
-
-static inline int32_t saturateToInt32(int64_t value){
-	// Function to clamp values to 32-bit signed range
-    if (value > INT32_MAX) return INT32_MAX;
-    if (value < INT32_MIN) return INT32_MIN;
-    return (int32_t)value;
-}
-
-void playTimerTickSoundWithMusic(){
-	xil_printf("playTimerTickSoundWithMusic\n");
-    for (int i = 0; i < TICK_SAMPLES*10; i++) {
-        // Read incoming audio sample
-        int32_t in_left = (int32_t)Xil_In32(I2S_DATA_RX_L_REG);
-        int32_t in_right = (int32_t)Xil_In32(I2S_DATA_RX_R_REG);
-
-        // Mix tick sound (assuming tick_sound is signed 8-bit PCM)
-        int32_t tick_sample = (int32_t)tick_sound[(int)(i/10)]; // Convert to int32_t for safe addition
-
-        int32_t new_left = saturateToInt32((int64_t)in_left+ tick_sample);// + tick_sample
-        int32_t new_right = saturateToInt32((int64_t)in_right+ tick_sample );//+ tick_sample
-
-        // Write back modified audio sample
-        Xil_Out32(I2S_DATA_TX_L_REG, (uint32_t)new_left);
-        Xil_Out32(I2S_DATA_TX_R_REG, (uint32_t)new_right);
-
-        // Delay to match playback rate
-        //usleep(NORMAL_PLAYBACK);
-    }
-}
-
-void play_music_and_tick(uint32_t se1, uint32_t se2){
-
-	Xil_Out32(I2S_DATA_TX_L_REG, se1 + se2);
-	Xil_Out32(I2S_DATA_TX_R_REG, se1 + se2);
-
-	usleep(NORMAL_PLAYBACK);
-}
-
+/* ---------------------------------------------------------------------------- *
+ * 								playMusic()										*
+ * ---------------------------------------------------------------------------- *
+ * Plays music from memory and also plays music over the ticking sound if the
+ * timer is running
+ * ---------------------------------------------------------------------------- */
 void playMusic(){
 
-	//xil_printf("Playing: %s\n", MUSIC_ARRAY->musicName[track_number]);
 	int music_samples = MUSIC_ARRAY->musicSamples[track_number];
 	int *musicPtr = MUSIC_ARRAY->musicAddr[track_number];
 
 	while((music_index < music_samples) && getSW2Flag_sharedMemory() && (getPlayTimerDoneFlag_sharedMemory() == 0)){
-
+		// Break condition if the track control is not zero
 		if (getTrackControl_sharedMemory() != 0) {
 			break;
 		}
 
+		// Check if volume needs to be increased
 		if (getVolumeControlFlag_sharedMemory() == 1) {
-			//xil_printf("increasing volume\n");
 			increaseVolume();
 			setVolumeControlFlag_sharedMemory(0);
 		}
-		else if (getVolumeControlFlag_sharedMemory() == 2) {
-			//xil_printf("decreasing volume\n");
+		else if (getVolumeControlFlag_sharedMemory() == 2) { // Check if volume needs to be decreased
 			decreaseVolume();
 			setVolumeControlFlag_sharedMemory(0);
 		}
 
+		// Checks with music and timer sounds needs to played
 		if(getTimerRunningFlag_sharedMemory() && getPlayTimerTickFlag_sharedMemory()){
 			tick_and_music();
 		}
-		else{
+		else{ // If only music needs to be played
 			play_sound_effect((uint32_t)*(musicPtr + music_index));
 			music_index++;
 		}
 
-		//setCurrentTrack_sharedMemory(track_number);
 	}
 }
 
+/* ---------------------------------------------------------------------------- *
+ * 								tick_and_music()								*
+ * ---------------------------------------------------------------------------- *
+ * Function that adds the amplitudes of the music and ticking sounds before 
+ * sending the added amplitudes to the channel outouts
+ * ---------------------------------------------------------------------------- */
 void tick_and_music(){
 	xil_printf("Playing: %s\n", MUSIC_ARRAY->musicName[track_number]);
 	int *music_ptr = MUSIC_ARRAY->musicAddr[track_number];
 
-	//xil_printf("Timer tick + music\n");
 	for(int tick_index = 0; tick_index < TICK_SAMPLES; tick_index++){
 		play_music_and_tick((uint32_t)*(music_ptr + music_index), (uint32_t)*(tick_sound + tick_index));
 		setPlayTimerTickFlag_sharedMemory(0);
 		music_index++;
 	}
-}
-
-void playMusicTest(){
-	/*
-	for (int i = 0; i < MUSIC1_SAMPLES; i++) {
-		play_sound_effect((uint32_t)*(music1_sound + i));
-	}
-	*/
 }

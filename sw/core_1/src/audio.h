@@ -15,16 +15,43 @@
 #include "shared_mem.h"
 #include "util.h"
 
-/* Redefine audio controller base address from xparameters.h */
+// Redefine audio controller base address from xparameters.h 
 #define AUDIO_BASE				XPAR_ZED_AUDIO_CTRL_0_BASEADDR
 
-/* Slave address for the ADAU audio controller 8 */
+// Slave address for the ADAU audio controller 8 
 #define IIC_SLAVE_ADDR			0x76
 
-/* I2C Serial Clock frequency in Hertz */
+// I2C Serial Clock frequency in Hertz 
 #define IIC_SCLK_RATE			400000
 
-/* ADAU internal registers */
+// Redefine GPIO base address from xparameters.h 
+#define BUTTON_SWITCH_BASE XPAR_GPIO_1_BASEADDR
+#define BUTTON_SWITCH_ID XPAR_GPIO_1_DEVICE_ID
+
+// Channel values for Button and Switches
+#define BUTTON_CHANNEL 1
+#define SWITCH_CHANNEL 2
+
+/* ---------------------------------------------------------------------------- *
+ * 							Audio Scaling Factor								*
+ * ---------------------------------------------------------------------------- */
+#define SCALE 6
+#define SAMPLE_SIZE 48000 * 10
+#define SLOW_FACTOR 2
+#define FAST_FACTOR 2
+#define NORMAL_PLAYBACK 20
+#define SLOW_PLAYBACK NORMAL_PLAYBACK * SLOW_FACTOR
+#define FAST_PLAYBACK NORMAL_PLAYBACK/FAST_FACTOR
+
+/* ---------------------------------------------------------------------------- *
+ * 							Volume Macros										*
+ * ---------------------------------------------------------------------------- */
+#define VOLUME_LEVEL 0x18
+#define MIN_VOLUME 0x00
+#define MAX_VOLUME 0xFF
+#define VOLUME_STEP 0x04
+
+// ADAU internal registers
 enum audio_regs {
 	R0_CLOCK_CONTROL								= 0x00,
 	R1_PLL_CONTROL 									= 0x02,
@@ -80,25 +107,8 @@ enum audio_regs {
 	R66_CLOCK_ENABLE_1 								= 0xFA
 };
 
-/* ---------------------------------------------------------------------------- *
- * 							Audio Scaling Factor								*
- * ---------------------------------------------------------------------------- */
-#define SCALE 6
-#define SAMPLE_SIZE 48000 * 10
-#define SLOW_FACTOR 2
-#define FAST_FACTOR 2
-#define NORMAL_PLAYBACK 20
-#define SLOW_PLAYBACK NORMAL_PLAYBACK * SLOW_FACTOR
-#define FAST_PLAYBACK NORMAL_PLAYBACK/FAST_FACTOR
 
-#define VOLUME_LEVEL 0x18
-//#define MIN_VOLUME 0x0E
-//#define MAX_VOLUME 0xFE
-#define MIN_VOLUME 0x00
-#define MAX_VOLUME 0xFF
-#define VOLUME_STEP 0x04
-
-/* Audio controller registers */
+// Audio controller registers 
 enum i2s_regs {
 	I2S_DATA_RX_L_REG	= 0x00 + AUDIO_BASE,
 	I2S_DATA_RX_R_REG	= 0x04 + AUDIO_BASE,
@@ -107,43 +117,35 @@ enum i2s_regs {
 	I2S_STATUS_REG      = 0x10 + AUDIO_BASE,
 };
 
-#define BUTTON_SWITCH_BASE XPAR_GPIO_1_BASEADDR
-#define LED_BASE XPAR_LED_CONTROLLER_0_S00_AXI_BASEADDR
-#define BUTTON_SWITCH_ID XPAR_GPIO_1_DEVICE_ID
 
-#define BUTTON_CHANNEL 1
-#define SWITCH_CHANNEL 2
-
+/* ---------------------------------------------------------------------------- *
+ *						Samples rates of timer sounds							*
+ * ---------------------------------------------------------------------------- */
 #define SAMPLE_RATE 44100
 #define TICK_SAMPLES 13824
 #define BEEP_SAMPLES 22050
 #define SPELL_SAMPLES 39534
 #define SPELL3_SAMPLES 39534
-#define MUSIC1_SAMPLES 1323000
 
-XIicPs Iic;
+XIicPs Iic; // IIC instance 
 XGpio Gpio; // Gpio instance for buttons and switches
 
-//unsigned int volumeLevel;
-unsigned int music_index;
+// Music variables 
+unsigned int music_index; // For music samples
+int track_number;// For which music to play
+int music_mode; // For music mode
 
-int track_number;
-int music_mode;
-
-/* Prototype Functions */
+// Functions Prototypes
 unsigned char IicConfig(unsigned int DeviceIdPS);
 void AudioPllConfig();
 void AudioWriteToReg(unsigned char u8RegAddr, unsigned char u8Data);
 void AudioConfigureJacks();
 void LineinLineoutConfig();
 unsigned char gpio_init();
-
-void audio_stream();
 void play_sound_effect(uint32_t se);
-void play_music_and_tick(uint32_t se1, uint32_t se2);
 void increaseVolume();
 void decreaseVolume();
-
+void audio_stream();
 void playTimerDoneSound();
 void playTimerTickSound();
 void playMusic();

@@ -1,6 +1,6 @@
 #include "shared_mem.h"
 
-//SETTERS
+// Setters
 void setTimerRunningFlag_sharedMemory(int value){
 	SHARED_MEMORY->timerRunningFlag = value;
 	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
@@ -51,7 +51,7 @@ void setTrackControl_sharedMemory(int value){
 	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
 }
 
-//GETTERS
+// Getters
 int getTimerRunningFlag_sharedMemory(){
 	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
 	return SHARED_MEMORY->timerRunningFlag;
