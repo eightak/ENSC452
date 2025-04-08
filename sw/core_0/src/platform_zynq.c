@@ -1,4 +1,11 @@
 /*
+ * PLATFORM_ZYNQ.C
+ *
+ * Modified from platform_zynq.c from the LWIP Echo Server template
+ * A single change made in line 192 to disable interrupt conflicts
+ */
+
+/*
  * Copyright (C) 2010 - 2019 Xilinx, Inc.
  * All rights reserved.
  *
@@ -181,7 +188,7 @@ void platform_setup_interrupts(void)
 {
 	Xil_ExceptionInit();
 
-	//+++++++++++++++++++++++++++++++++++++++++++COMMENTED THIS OUT++++++++++++++++++
+	//+++++++++++++++++++++COMMENTED THIS OUT++++++++++++++++++
 	//XScuGic_DeviceInitialize(INTC_DEVICE_ID);
 
 	/*

@@ -1,46 +1,40 @@
+/*
+ * MUSIC.C
+ *
+ * functions related to changing the music during music mode
+ */
+
 #include "music.h"
 
+//Sends flags to core 1 depending on the button pressed
 void music() {
 	if (button_pressed_flag) {
 		switch(btn_value) {
 		case (CENTRE_BUTTON):
-			//xil_printf("centre button in music\n");
-			;
-			int music_mode = getMusicMode_sharedMemory();;
-			//music_mode =
+			; //not a typo
+			int music_mode = getMusicMode_sharedMemory();
 			music_mode = ++music_mode;
 			music_mode = music_mode % NUM_MUSIC_MODE;
-			/*
-			if (music_mode < NUM_MUSIC_MODE){
-				music_mode++;
-			}
-			else{
-				music_mode = 0;
-			}
-			*/
+
 			setMusicMode_sharedMemory(music_mode);
-			//xil_printf("music_mode = %d\n", music_mode);
 			break;
-		case (UP_BUTTON):
-				//xil_printf("up button in music\n");
+		case (UP_BUTTON): //Increase Volume
 			setVolumeControlFlag_sharedMemory(1);
 			break;
-		case (DOWN_BUTTON):
-				//xil_printf("down button in music\n");
+		case (DOWN_BUTTON): //Decrease Volume
 			setVolumeControlFlag_sharedMemory(2);
 			break;
-		case (RIGHT_BUTTON):
-				//xil_printf("right button in music\n");
+		case (RIGHT_BUTTON): //Next Track
 			setTrackControl_sharedMemory(1);
 			break;
-		case (LEFT_BUTTON):
-				//xil_printf("left button in music\n");
+		case (LEFT_BUTTON): //Previous Track
 			setTrackControl_sharedMemory(2);
 			break;
 		}
 	}
 }
 
+//Shuffles the music
 void shuffleMusicArray(MusicStruct * ms) {
 	xil_printf("Shuffling...\n");
     for (int i = NUM_MUSIC_TRACKS - 1; i > 0; i--) {
@@ -69,14 +63,13 @@ void shuffleMusicArray(MusicStruct * ms) {
         strcpy(ms->musicArtist[j], tempArtist);
         ms->musicSamples[j] = tempSamples;
 
-
-
     }
     for (int i = 0; i < NUM_MUSIC_TRACKS; i++) {
     	xil_printf("Shuffled => %s\n", ms->musicName[i]);
     }
 }
 
+//Reverts the music to its original position
 void revertMusicToOriginalQueue(MusicStruct_OG * ms_og, MusicStruct * ms){
 	for(int i = 0; i < NUM_MUSIC_TRACKS; i++){
 		ms->musicAddr[i] = ms_og->musicAddr[i];

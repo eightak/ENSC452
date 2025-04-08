@@ -1,3 +1,9 @@
+/*
+ * MUSIC.H
+ *
+ * functions related to changing the music during music mode
+ */
+
 #ifndef MUSIC_H
 #define MUSIC_H
 

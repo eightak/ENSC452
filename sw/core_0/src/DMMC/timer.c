@@ -1,3 +1,11 @@
+/*
+ * TIMER.C
+ *
+ * Initialization and maintenance of the timer mode
+ * Manages controls (button presses) inside timer mode
+ *
+ */
+
 #include "timer.h"
 
 void AXITimerInit(){
@@ -43,6 +51,7 @@ double getClockPeriod(){
 
 
 void init_timer(int * background) {
+	//timer initialization
 	if (sw1_rising_edge) {
 		//xil_printf("init timer..\n");
 		//Disable clock
@@ -54,36 +63,39 @@ void init_timer(int * background) {
 		startTimerFlag = 0;
 
 		calculateTime(0, timerChar);
+
 		chooseFontColour(550, 450, background);
-		//memcpy(image_buffer_pointer, left_image_pointer, NUM_BYTES_BUFFER);
 		write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
 		displayImage(curr_image_ptr);
 		sw1_rising_edge = 0;
 	}
 
+	//update the timer
 	if (startTimerFlag == 1) {
 		timeElapsedInSeconds = (unsigned int)getElapsedTimerInSeconds();
 		calculateTime(setTimerValueInSeconds - timeElapsedInSeconds, timerChar);
-		//write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
-		//displayImage(curr_image_ptr);
 	}
 
+	//operations every second
 	if(timeElapsedInSeconds != nextSecond){
 		write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
 		displayImage(curr_image_ptr);
-		//playTimerTickSound();
+
+		//play the tick sound
 		setPlayTimerTickFlag_sharedMemory(1);
 		nextSecond = timeElapsedInSeconds;
 	}
 
+	//Check if time is up
 	if((startTimerFlag == 1) && (timeElapsedInSeconds >= setTimerValueInSeconds)){
 		//xil_printf("TIMER DONE!!!\n");
 		write_string((char*)"TIMER DONE!", 475, 450, background, curr_image_ptr, 7);
 		displayImage(curr_image_ptr);
-		//playTimerDoneSound();
+
+		//stop ticking and start beeping
 		setPlayTimerTickFlag_sharedMemory(0);
 		setPlayTimerDoneFlag_sharedMemory(1);
-		//startTimerFlag = 0;
+
 		setTimerValueInSeconds = 0;
 		stopTimer();
 		resetTimer();
@@ -91,10 +103,9 @@ void init_timer(int * background) {
 	else if (startTimerFlag == 1) {
 		timeElapsedInSeconds = (unsigned int)getElapsedTimerInSeconds();
 		calculateTime(setTimerValueInSeconds - timeElapsedInSeconds, timerChar);
-		//write_string(timerChar, 550, 450, background, curr_image_ptr, 7);
-		//displayImage(curr_image_ptr);
 	}
 
+	//button controls
 	if (button_pressed_flag) {
 		switch (btn_value) {
 			case CENTRE_BUTTON: // start/pause
@@ -106,7 +117,7 @@ void init_timer(int * background) {
 					startTimerFlag = 1;
 					//xil_printf("Timer started for %d seconds\n", setTimerValueInSeconds);
 				}
-				else if (startTimerFlag == 1) {
+				else if (startTimerFlag == 1) { // stop
 					//xil_printf("stopping timer...\n");
 					//Stop Beep
 					setPlayTimerDoneFlag_sharedMemory(0);

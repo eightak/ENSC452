@@ -1,3 +1,9 @@
+/*
+ * DATA_RECEPTION.C
+ *
+ * FSM for data reception from host PC via ethernet
+ */
+
 #include "data_reception.h"
 
 /* FSM STATES:
@@ -13,7 +19,6 @@ uint8_t * ethernet_image_uint8 = (uint8_t *)0x083F0000;
 int insert_ss_idx = 4;
 
 void receive_reception() {
-	//int size = BUF_SIZE;
 
 	switch (fsm_state) {
 	case 0:
@@ -61,7 +66,6 @@ void receive_reception() {
 																	   );
 			}
 
-			//displayImage(ethernet_image_ptr);
 			memcpy(slideshow_images[insert_ss_idx], ethernet_image_ptr, NUM_BYTES_BUFFER);
 
 			//xil_printf("inserted new image into slideshow index: %d\n", insert_ss_idx);
@@ -82,13 +86,6 @@ void receive_reception() {
 			fsm_state = 0;
 			pixelsProcessed = 0;
 		}
-
-		//process image into memory
-		//xil_printf("processing image...\n");
-		//xil_printf("message: %s\n", fsm1);
-
-		//fsm_state = 0;
-		//memset(fsm1, '\0', BUF_SIZE);
 		break;
 	case 2:
 		//xil_printf("processing weather...\n");
@@ -100,7 +97,6 @@ void receive_reception() {
 		home_screen();
 
 		fsm_state = 0;
-		//memset(&weather, 0, sizeof(weatherData));
 		break;
 	case 3:
 		//xil_printf("processing time...\n");
@@ -114,11 +110,9 @@ void receive_reception() {
 		set_clock(localTime);
 
 		fsm_state = 0;
-		//memset(&localTime, 0, sizeof(localTimeData));
 		break;
 	default:
 		//do nothing
-
 		fsm_state = 0;
 		break;
 	}

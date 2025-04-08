@@ -1,3 +1,8 @@
+/*
+ * UART_FUNC.H
+ *
+ * Uart initializations and reception logic
+ */
 #ifndef __UART_FUNC_H_
 #define __UART_FUNC_H_
 
@@ -10,7 +15,6 @@
 
 #define BUFFER_SIZE 100
 
-
 u32 CntrlRegister;
 uint8_t tempbuf[BUFFER_SIZE];
 uint8_t messageIn[BUFFER_SIZE];
@@ -19,7 +23,7 @@ XUartPs myUart;
 int receivedBytes;
 int processingDone;
 
-//#include "../echo.c" PROTOTYPE FUNCTIONs
+//#include "../echo.c" PROTOTYPE FUNCTION
 void receiveMessage(uint8_t*, int);
 
 int idx;

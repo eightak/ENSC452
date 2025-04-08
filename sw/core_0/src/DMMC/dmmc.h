@@ -1,3 +1,10 @@
+/*
+ * DMMC.H
+ *
+ * This is the psuedo main loop for the smart display logic.
+ * Used in main.c after establishing Ethernet connection
+ */
+
 #ifndef __DMMC_H_
 #define __DMMC_H_
 
@@ -10,9 +17,7 @@
 #include "xil_exception.h"
 #include "xscugic.h"
 #include "xil_printf.h"
-//#include <cstdlib>
 #include "interrupts.h"
-//#include "audio.h"
 #include "display.h"
 #include "timer.h"
 #include "HW_clock.h"

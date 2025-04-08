@@ -1,3 +1,9 @@
+/*
+ * HOME.H
+ *
+ * Features Uart processing inside the homescreen, as well as basic initializations
+ */
+
 #ifndef __HOME_H_
 #define __HOME_H_
 

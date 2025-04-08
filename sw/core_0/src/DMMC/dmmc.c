@@ -1,3 +1,10 @@
+/*
+ * DMMC.C
+ *
+ * This is the psuedo main loop for the smart display logic.
+ * Used in main.c after establishing Ethernet connection
+ */
+
 #include "dmmc.h"
 
 const localTimeData ctRST = {0, 1, 1, 0, 0, 0};
@@ -7,15 +14,6 @@ int elapsed_seconds = 0;
 int Setup(){
 
 	int xStatus;
-
-	//Set "previous" sw value to 0
-	prev_sw_value = 0;
-	sw0_rising_edge = 0;
-	sw1_rising_edge = 0;
-	sw2_rising_edge = 0;
-	sw3_rising_edge = 0;
-	sw4_rising_edge = 0;
-	switch_falling_edge = 0;
 
 	xStatus = XGpio_Initialize(&BTNInst, BTNS_DEVICE_ID);
 	if (xStatus != XST_SUCCESS) {
@@ -35,8 +33,18 @@ int Setup(){
 	sw_value = XGpio_DiscreteRead(&BTNInst, 2);
 
 	//INITIALIZATIONS
-	//Reinitialize global clock to 0
+
+	//initialize global clock to 0
 	set_clock(ctRST);
+
+	//Set "previous" sw value to 0
+	prev_sw_value = 0;
+	sw0_rising_edge = 0;
+	sw1_rising_edge = 0;
+	sw2_rising_edge = 0;
+	sw3_rising_edge = 0;
+	sw4_rising_edge = 0;
+	switch_falling_edge = 0;
 
 	localTime = ctRST;
 
@@ -46,6 +54,7 @@ int Setup(){
 
 	slideshow_init();
 
+	//set all shared memory flags to 0
 	setTimerRunningFlag_sharedMemory(0);
 	setPlayTimerTickFlag_sharedMemory(0);
 	setPlayTimerDoneFlag_sharedMemory(0);
@@ -65,8 +74,6 @@ int Setup(){
 }
 
 void MainLoop(){
-	//elapsed_seconds = elapsed_time(ctRST);
-	//while(1){
 		//Operations that trigger once per second
 		if (elapsed_time(ctRST) != elapsed_seconds) {
 			//do something
@@ -85,6 +92,7 @@ void MainLoop(){
 			elapsed_seconds = elapsed_time(ctRST);
 		}
 
+		//Shuffle
 		if (sw3_rising_edge) {
 			shuffleMusicArray(MUSIC_ARRAY);
 			sw3_rising_edge = 0;
@@ -93,14 +101,11 @@ void MainLoop(){
 		//Always ready for Uart Input
 		getUart();
 
+		//Start music
 		if (sw2_rising_edge) {
-			//xil_printf("music start?\n");
+			//xil_printf("music start\n");
 			setSW2Flag_sharedMemory(1);
-			//setCurrentTrack_sharedMemory(0);
 			sw2_rising_edge = 0;
-
-			//displayMusic(time_image_ptr, time_image_ptr);
-			//displayImage(time_image_ptr);
 		}
 
 		if(sw1_bit == 1){ //TIMER MODE
@@ -114,45 +119,31 @@ void MainLoop(){
 			showTimeFlag = 1;
 
 			slideshow(button_pressed_flag);
-			//memcpy(image_buffer_pointer, sw0_image_ptr, NUM_BYTES_BUFFER);
-			//xil_printf("sw0\n");
 		}
 		else if (sw2_bit == 1) {
+			//basic controls inside music mode
 			music();
 		}
 		else if (button_pressed_flag) {
 			switch (btn_value) {
 			  case CENTRE_BUTTON:
 			      //xil_printf("centre button\n");
-
-				  //memcpy(image_buffer_pointer, centre_image_ptr, NUM_BYTES_BUFFER);
 				  home_screen();
 			    break;
 			  case DOWN_BUTTON:
 				  //xil_printf("down button\n");
 				  setVolumeControlFlag_sharedMemory(2);
-				  //memcpy(curr_image_ptr, down_image_ptr, NUM_BYTES_BUFFER);
-				  //displayImage(down_image_ptr);
 			    break;
 			  case LEFT_BUTTON:
 				  //xil_printf("left button\n");
 				  shuffleSlideshow();
-				  //displayImage(left_image_ptr);
-				  //memcpy(curr_image_ptr, left_image_ptr, NUM_BYTES_BUFFER);
-				  //displayTime(left_image_ptr);
 			    break;
 			  case RIGHT_BUTTON:
-				  //xil_printf("right button\n");
-				  //localTimeData ct = {2025,3,31,3,10,45};
-				  //set_clock(ct);
-				  //memcpy(curr_image_ptr, right_image_ptr, NUM_BYTES_BUFFER);
-				  //displayImage(right_image_ptr);
+				  //do nothing
 			    break;
 			  case UP_BUTTON:
 				  //xil_printf("up button\n");
 				  setVolumeControlFlag_sharedMemory(1);
-				  //memcpy(curr_image_ptr, up_image_ptr, NUM_BYTES_BUFFER);
-				  //displayImage(up_image_ptr);
 			    break;
 			}
 		}
@@ -164,7 +155,6 @@ void MainLoop(){
 			}
 
 			if (sw3_bit == 0) {
-				//xil_printf("revertQ\n");
 				revertMusicToOriginalQueue(MUSIC_ARRAY_OG, MUSIC_ARRAY);
 			}
 
@@ -176,6 +166,5 @@ void MainLoop(){
 		}
 
 		button_pressed_flag = 0;
-	//}
 }
 

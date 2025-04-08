@@ -1,0 +1,21 @@
+#ifndef MUSIC_H
+#define MUSIC_H
+
+#include <stdio.h>
+#include <string.h>
+#include "xparameters.h"
+#include "random_num_gen_ip.h"
+#include "xil_io.h"
+#include "shared_mem.h"
+#include "interrupts.h" //button values
+#include "slideshow.h" //for random
+
+void music();
+
+void getMusicModeStr(char * charValue, int value);
+
+void shuffleMusicArray(MusicStruct * ms);
+
+void revertMusicToOriginalQueue(MusicStruct_OG * ms_og, MusicStruct * ms);
+
+#endif

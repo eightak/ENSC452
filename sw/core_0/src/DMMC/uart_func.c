@@ -1,7 +1,13 @@
+/*
+ * UART_FUNC.C
+ *
+ * Uart initializations and reception logic
+ */
+
 #include "uart_func.h"
 
 int init_uart() {
-	//NEW
+
 	int xStatus;
 
 	CntrlRegister = XUartPs_ReadReg(UART_BASEADDR, XUARTPS_CR_OFFSET);
@@ -20,8 +26,6 @@ int init_uart() {
 		return XST_FAILURE;
 	}
 
-	//NEW
-	//Init Variables
 	reset_tempbuf();
 
 	return 0;

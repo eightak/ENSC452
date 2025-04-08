@@ -1,0 +1,35 @@
+#ifndef __DMMC_H_
+#define __DMMC_H_
+
+#include <stdio.h>
+#include <string.h>
+#include "xil_types.h"
+#include "xparameters.h"
+#include "xgpio.h"
+#include "xil_io.h"
+#include "xil_exception.h"
+#include "xscugic.h"
+#include "xil_printf.h"
+#include "interrupts.h"
+#include "display.h"
+#include "timer.h"
+#include "HW_clock.h"
+#include "slideshow.h"
+#include "uart_func.h"
+#include "home.h"
+#include "music.h"
+#include "stopwatch.h"
+
+#include "../data_reception.h" //for sendtts
+
+//dual core
+#include "shared_mem.h"
+
+int Setup();
+void MainLoop();
+
+extern const localTimeData ctRST;
+
+extern int elapsed_seconds;
+
+#endif

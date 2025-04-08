@@ -1,3 +1,9 @@
+/*
+ * DISPLAY.H
+ *
+ * This file contains all functions relating to displaying images onto the image_buffer_pointer
+ */
+
 #ifndef __DISPLAY_H_
 #define __DISPLAY_H_
 
@@ -40,7 +46,6 @@ extern int * timer_image_ptr;
 int showTimeFlag;
 uint32_t font_colour;
 
-//extern int * sw0_image_ptr;
 extern int * time_image_ptr;
 extern int * curr_image_ptr;
 

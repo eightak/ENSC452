@@ -1,3 +1,11 @@
+/*
+ * INTERRUPTS.H
+ *
+ * Sets up button and switch interrupts
+ * features a sw implementation of the button debouncer using sleep
+ * based on interrupts on the video and audio tutorial
+ */
+
 #ifndef INTERRUPTS_H_
 #define INTERRUPTS_H_
 
@@ -66,11 +74,9 @@ volatile int TIMER_INTR_FLG;
 int tmr_count;
 
 XScuGic InterruptController; /* Instance of the Interrupt Controller */
-//static XScuGic_Config *GicConfig;/* The configuration parameters of thecontroller */
 void Btn_InterruptHandler(void *InstancePtr);
 void Timer_InterruptHandler(XTmrCtr *data, u8 TmrCtrNumber);
 void Sw_InterruptHandler(void *InstancePtr);
 int ScuGicInterrupt_Init(u16 DeviceId, XGpio *GpioInstancePtr);
-//int ScuGicInterrupt_Init(u16 DeviceId, XGpio *GpioInstancePtr);
 
 #endif

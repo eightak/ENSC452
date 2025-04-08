@@ -1,0 +1,26 @@
+#ifndef __STOPWATCH_H_
+#define __STOPWATCH_H_
+
+#include <stdio.h>
+#include <string.h>
+#include "xtmrctr.h"
+#include "xil_printf.h"
+
+#include "interrupts.h"
+#include "display.h" //for image addresses
+#include "shared_mem.h"
+#include "home.h" //for home_screen()
+#include "timer.h" //for axi timer functions
+#include "music.h"
+
+int swStartFlag;
+int swRunningFlag;
+char swtimeStr[6];
+unsigned int sw_timeElapsedInSeconds;
+unsigned int sw_nextSecond;
+unsigned int swSavedTime;
+
+void init_stopwatch(int * background);
+void stopwatch(int * background);
+
+#endif
