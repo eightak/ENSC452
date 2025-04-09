@@ -11,7 +11,6 @@
 #include "xuartps.h"
 #include "stdlib.h"
 #include "xparameters.h"
-#include "interrupts.h"
 #include "shared_mem.h"
 #include "util.h"
 
@@ -146,6 +145,7 @@ void play_sound_effect(uint32_t se);
 void increaseVolume();
 void decreaseVolume();
 void audio_stream();
+void play_music_and_tick(uint32_t se1, uint32_t se2);
 void playTimerDoneSound();
 void playTimerTickSound();
 void playMusic();

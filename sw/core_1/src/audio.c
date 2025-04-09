@@ -357,10 +357,23 @@ void playMusic(){
 }
 
 /* ---------------------------------------------------------------------------- *
+ * 							play_music_and_tick()								*
+ * ---------------------------------------------------------------------------- *
+ * Function that adds the amplitudes of two audio outputs
+ * ---------------------------------------------------------------------------- */
+void play_music_and_tick(uint32_t se1, uint32_t se2){
+
+    Xil_Out32(I2S_DATA_TX_L_REG, se1 + se2);
+    Xil_Out32(I2S_DATA_TX_R_REG, se1 + se2);
+
+    usleep(NORMAL_PLAYBACK);
+}
+
+/* ---------------------------------------------------------------------------- *
  * 								tick_and_music()								*
  * ---------------------------------------------------------------------------- *
  * Function that adds the amplitudes of the music and ticking sounds before 
- * sending the added amplitudes to the channel outouts
+ * sending the added amplitudes to the channel outputs
  * ---------------------------------------------------------------------------- */
 void tick_and_music(){
 	xil_printf("Playing: %s\n", MUSIC_ARRAY->musicName[track_number]);

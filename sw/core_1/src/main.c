@@ -8,7 +8,6 @@
 #include "xil_exception.h"
 #include "xscugic.h"
 #include "xil_printf.h"
-#include "interrupts.h"
 #include "audio.h"
 #include "xil_cache.h"
 #include "shared_mem.h"
