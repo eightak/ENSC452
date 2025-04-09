@@ -1,9 +1,24 @@
-17:59:40 **** Build of configuration Debug for project core_1 ****
+18:07:09 **** Build of configuration Debug for project core_1 ****
 make all 
 make --no-print-directory pre-build
 a9-linaro-pre-build-step
 ' '
 make --no-print-directory main-build
+'Building file: ../src/audio.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/audio.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bspinclude/include -MMD -MP -MF"src/audio.d" -MT"src/audio.o" -o "src/audio.o" "../src/audio.c"
+'Finished building: ../src/audio.c'
+' '
+'Building file: ../src/main.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/main.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bspinclude/include -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+'Finished building: ../src/main.c'
+' '
+'Building file: ../src/shared_mem.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/shared_mem.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bspinclude/include -MMD -MP -MF"src/shared_mem.d" -MT"src/shared_mem.o" -o "src/shared_mem.o" "../src/shared_mem.c"
+'Finished building: ../src/shared_mem.c'
+' '
 'Building file: ../src/util.c'
 'Invoking: ARM v7 gcc compiler'
 arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/util.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bspinclude/include -MMD -MP -MF"src/util.d" -MT"src/util.o" -o "src/util.o" "../src/util.c"
@@ -11,15 +26,15 @@ arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/util.o" -mcpu=cort
 ' '
 'Building target: core_1.elf'
 'Invoking: ARM v7 gcc linker'
-arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -LC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bsplib/lib -o "core_1.elf"  ./src/audio.o ./src/interrupts.o ./src/main.o ./src/shared_mem.o ./src/util.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=none -specs=Xilinx.spec -Wl,-T -Wl,../src/lscript.ld -LC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_1/bsplib/lib -o "core_1.elf"  ./src/audio.o ./src/main.o ./src/shared_mem.o ./src/util.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
 'Finished building target: core_1.elf'
 ' '
 'Invoking: ARM v7 Print Size'
 arm-none-eabi-size core_1.elf  |tee "core_1.elf.size"
    text	   data	    bss	    dec	    hex	filename
-  42764	   1984	3862824	3907572	 3b9ff4	core_1.elf
+  37440	   1208	3862680	3901328	 3b8790	core_1.elf
 'Finished building: core_1.elf.size'
 ' '
 
-17:59:42 Build Finished (took 1s.715ms)
+18:07:12 Build Finished (took 2s.937ms)
 

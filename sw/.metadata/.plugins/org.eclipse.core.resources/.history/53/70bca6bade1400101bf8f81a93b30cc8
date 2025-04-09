@@ -1,0 +1,103 @@
+#include "shared_mem.h"
+
+// Setters
+void setTimerRunningFlag_sharedMemory(int value){
+	SHARED_MEMORY->timerRunningFlag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setPlayTimerDoneFlag_sharedMemory(int value){
+	SHARED_MEMORY->playTimerDoneSoundFlag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setPlayTimerTickFlag_sharedMemory(int value){
+	SHARED_MEMORY->playTimerTickSoundFlag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setSW2Flag_sharedMemory(int value){
+	SHARED_MEMORY->sw2Flag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setSW3Flag_sharedMemory(int value){
+	SHARED_MEMORY->sw3Flag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setVolumeControlFlag_sharedMemory(int value) {
+	SHARED_MEMORY->volumeControlFlag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setTTSFlag_sharedMemory(int value){
+	SHARED_MEMORY->TTSFlag = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setMusicMode_sharedMemory(int value){
+	SHARED_MEMORY->musicMode = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setCurrentTrack_sharedMemory(int value){
+	SHARED_MEMORY->currentTrack = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+void setTrackControl_sharedMemory(int value){
+	SHARED_MEMORY->trackControl = value;
+	Xil_DCacheFlushRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+}
+
+// Getters
+int getTimerRunningFlag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->timerRunningFlag;
+}
+
+int getPlayTimerDoneFlag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->playTimerDoneSoundFlag;
+}
+
+int getPlayTimerTickFlag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->playTimerTickSoundFlag;
+}
+
+int getSW2Flag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->sw2Flag;
+}
+
+int getSW3Flag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->sw3Flag;
+}
+
+int getVolumeControlFlag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->volumeControlFlag;
+}
+
+int getTTSFlag_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->TTSFlag;
+}
+
+int getMusicMode_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->musicMode;
+}
+
+int getCurrentTrack_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->currentTrack;
+}
+
+int getTrackControl_sharedMemory(){
+	Xil_DCacheInvalidateRange((INTPTR)SHARED_MEMORY, sizeof(shared_data_t));
+	return SHARED_MEMORY->trackControl;
+}

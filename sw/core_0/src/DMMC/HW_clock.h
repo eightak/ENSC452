@@ -1,4 +1,6 @@
 /*
+ *
+ *
  * Functions that get and set the time from the global_clk hardware block
  */
 

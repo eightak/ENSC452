@@ -1,3 +1,9 @@
+/*
+ * SHARED_MEM.C
+ *
+ * setters and getters for communication between cores
+ */
+
 #include "shared_mem.h"
 
 // Setters
