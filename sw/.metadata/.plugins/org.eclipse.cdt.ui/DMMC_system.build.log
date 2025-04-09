@@ -1,10 +1,8 @@
-18:07:21 **** Build of configuration Debug for project DMMC_system ****
-make all 
-Generating bif file for the system project
-generate_system_bif.bat 50287 C:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/dmm_design_wrapper.xpfm standalone_ps7_cortexa9_0,standalone_ps7_cortexa9_1 C:/Users/eitak/Desktop/Github/ENSC452/sw/DMMC_system/Debug/system.bif
-sdcard_gen --xpfm C:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/dmm_design_wrapper.xpfm --sys_config dmm_design_wrapper --bif C:/Users/eitak/Desktop/Github/ENSC452/sw/DMMC_system/Debug/system.bif --bitstream C:/Users/eitak/Desktop/Github/ENSC452/sw/core_0/_ide/bitstream/dmm_design_wrapper.bit --elf C:/Users/eitak/Desktop/Github/ENSC452/sw/core_0/Debug/core_0.elf,ps7_cortexa9_0 --elf C:/Users/eitak/Desktop/Github/ENSC452/sw/core_1/Debug/core_1.elf,ps7_cortexa9_1
-creating BOOT.BIN using C:/Users/eitak/Desktop/Github/ENSC452/sw/core_0/_ide/bitstream/dmm_design_wrapper.bit
-Running C:/Xilinx/Vitis/2020.2/bin/bootgen  -image C:/Users/eitak/Desktop/Github/ENSC452/sw/DMMC_system/Debug/sd_card_temp/boot.bif -w -o i BOOT.BIN
+20:41:44 **** Clean-only build of configuration Debug for project DMMC_system ****
+make clean 
+rm -rf ./_sds
+rm -rf package
+rm -f system.bif
 
-18:07:32 Build Finished (took 10s.879ms)
+20:41:44 Build Finished (took 199ms)
 

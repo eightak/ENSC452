@@ -1,9 +1,10 @@
 # ENSC452
  
 # STEPS TO SIMULATE THE CODE
-1. Run the code in vitis
-2. Download all resources in dow.tcl (path names need to be modified)
-3. run "python client.py" in the scripts folder
+1. Build the project in vitis
+2. Run the code in vitis
+3. Download all resources in dow.tcl (path names need to be modified)
+4. run "python client.py" in the scripts folder
 
 
 # COMMANDS IN CLIENT.PY

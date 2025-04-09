@@ -409,3 +409,16 @@ timestamp=[2025-04-08 18:07:02], mode=PLATFORM_GENERATION, duration=0:00:38.462,
 timestamp=[2025-04-08 18:07:12], mode=BUILD, duration=0:00:02.964, duration_ms=2964, data={name=core_1, configuration=Debug, clean_build=false}
 timestamp=[2025-04-08 18:07:21], mode=BUILD, duration=0:00:08.822, duration_ms=8822, data={name=core_0, configuration=Debug, clean_build=false}
 timestamp=[2025-04-08 18:07:32], mode=BUILD, duration=0:00:10.902, duration_ms=10902, data={name=DMMC_system, configuration=Debug, clean_build=false}
+timestamp=[2025-04-08 20:38:47], mode=WORKBENCH_START, duration=0:00:15.836, duration_ms=15836, data={}
+timestamp=[2025-04-08 20:38:49], mode=WORKBENCH_UI_INIT, duration=0:00:01.580, duration_ms=1580, data={editors_count=8, platform_editors_count=0, projects_count=5, platform_projects_count=1, active_platform_editor=false, projects=DMMC_system,RemoteSystemsTempFiles,core_0,core_1,dmm_design_wrapper}
+timestamp=[2025-04-08 20:38:49], mode=PLATFORM_REPOSITORY_INIT, duration=0:00:00.387, duration_ms=387, data={}
+timestamp=[2025-04-08 20:39:05], mode=BUILD, duration=0:00:03.763, duration_ms=3763, data={name=core_1, configuration=Debug, clean_build=false}
+timestamp=[2025-04-08 20:39:12], mode=BUILD, duration=0:00:06.404, duration_ms=6404, data={name=core_0, configuration=Debug, clean_build=false}
+timestamp=[2025-04-08 20:39:25], mode=BUILD, duration=0:00:12.204, duration_ms=12204, data={name=DMMC_system, configuration=Debug, clean_build=false}
+timestamp=[2025-04-08 20:40:09], mode=PLATFORM_GENERATION, duration=0:00:18.946, duration_ms=18946, data={name=dmm_design_wrapper}
+timestamp=[2025-04-08 20:40:57], mode=PLATFORM_GENERATION, duration=0:00:26.318, duration_ms=26318, data={name=dmm_design_wrapper}
+timestamp=[2025-04-08 20:41:37], mode=PLATFORM_GENERATION, duration=0:00:32.975, duration_ms=32975, data={name=dmm_design_wrapper}
+timestamp=[2025-04-08 20:41:43], mode=PLATFORM_GENERATION, duration=0:00:02.713, duration_ms=2713, data={name=dmm_design_wrapper}
+timestamp=[2025-04-08 20:41:43], mode=BUILD, duration=0:00:00.265, duration_ms=265, data={name=core_1, configuration=Debug, clean_build=true}
+timestamp=[2025-04-08 20:41:44], mode=BUILD, duration=0:00:00.268, duration_ms=268, data={name=core_0, configuration=Debug, clean_build=true}
+timestamp=[2025-04-08 20:41:44], mode=BUILD, duration=0:00:00.213, duration_ms=213, data={name=DMMC_system, configuration=Debug, clean_build=true}
