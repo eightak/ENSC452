@@ -1,3 +1,11 @@
+/*
+ * STOPWATCH.H
+ *
+ * Initialization and maintenance of the stopwatch mode
+ * Manages controls (button presses) inside stopwatch mode
+ *
+ */
+
 #ifndef __STOPWATCH_H_
 #define __STOPWATCH_H_
 

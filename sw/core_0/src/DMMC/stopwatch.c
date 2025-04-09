@@ -1,3 +1,11 @@
+/*
+ * STOPWATCH.C
+ *
+ * Initialization and maintenance of the stopwatch mode
+ * Manages controls (button presses) inside stopwatch mode
+ *
+ */
+
 #include "stopwatch.h"
 
 void init_stopwatch(int * background) {
@@ -8,10 +16,10 @@ void init_stopwatch(int * background) {
 	sw_nextSecond = 0;
 	swSavedTime = 0;
 }
+
 void stopwatch(int * background) {
 	if (sw4_rising_edge) {
 		init_stopwatch(background);
-		sw4_rising_edge = 0;
 
 		showTimeFlag = 0;
 
@@ -23,7 +31,6 @@ void stopwatch(int * background) {
 	}
 
     // Stop watch
-
 	 if(swStartFlag == 0  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
 		 swStartFlag = 1;
 		 swRunningFlag = 1;
@@ -33,6 +40,7 @@ void stopwatch(int * background) {
 		 setTimerRunningFlag_sharedMemory(1);
 	 }
 
+	 // Start Stopwatch
 	 if(swStartFlag == 1  && swRunningFlag == 0 && (XGpio_DiscreteRead(&BTNInst, 1) == RIGHT_BUTTON)){
 		 swStartFlag = 1;
 		 swRunningFlag = 1;
@@ -41,18 +49,22 @@ void stopwatch(int * background) {
 		 setTimerRunningFlag_sharedMemory(1);
 	 }
 
+	 //Update stopwatch value
 	 if(swRunningFlag){
 		 sw_timeElapsedInSeconds = swSavedTime + (unsigned int)getElapsedTimerInSeconds();
 	 }
 
+	 //Operations performed every second
 	 if(sw_timeElapsedInSeconds !=  sw_nextSecond){
 		 sw_nextSecond = sw_timeElapsedInSeconds;
 		 calculateTime(sw_timeElapsedInSeconds, swtimeStr);
 		 //xil_printf("%s\n", swtimeStr);
 
+		 //display time elapsed time
 		 write_string(swtimeStr, 550, 450, background, curr_image_ptr, 7);
 		 displayImage(curr_image_ptr);
-		 // display sw
+
+		 //play tick sound
 		 setPlayTimerTickFlag_sharedMemory(1);
 	 }
 

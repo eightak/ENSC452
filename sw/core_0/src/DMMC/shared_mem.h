@@ -1,3 +1,9 @@
+/*
+ * SHARED_MEM.H
+ *
+ * setters and getters for communication between cores
+ */
+
 #ifndef SHARED_MEM_H
 #define SHARED_MEM_H
 

@@ -1,4 +1,12 @@
 /*
+ * ECHO.C
+ *
+ * Modified from echo.c from the LWIP Echo Server template
+ * Receives different data depending on the fsm state from data_reception.h
+ * sends data from the uart to the host PC
+ */
+
+/*
  * Copyright (C) 2009 - 2019 Xilinx, Inc.
  * All rights reserved.
  *
@@ -69,7 +77,6 @@ err_t send_callback(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) 
 	if (processingDone) {
 		//xil_printf("Sending %d data bytes\n", size);
 		err = tcp_write(tpcb, (void *)bufferPntr, size, 1);
-		//processingDone = 0;
 	}
 	return ERR_OK;
 }

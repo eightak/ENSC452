@@ -1,3 +1,8 @@
+/*
+ * Functions that get and set the time from the global_clk hardware block
+ */
+
+
 #include "HW_clock.h"
 
 int *sec_ptr = (int *)(GLOBAL_CLK_BASE + SEC_OFFSET);

@@ -1,3 +1,9 @@
+/*
+ * DISPLAY.C
+ *
+ * This file contains all functions relating to displaying images onto the image_buffer_pointer
+ */
+
 #include "display.h"
 
 
@@ -16,7 +22,6 @@ int * london_image_ptr = (int *)0x028A4010;
 int * stopwatch_image_ptr = (int *)0x0308D014;
 int * timer_image_ptr = (int *)0x03876018;
 
-//int * sw0_image_ptr = (int *)0x405F01C;
 /* DDR USAGE IN SLIDESHOW
 int * slideshow_images[6] = {
 	(int *)0x5A90000,
@@ -36,6 +41,7 @@ const int width = 5;
 const int gap = 2;
 const int windoww = 1280;
 
+//Writes an input character onto a base mask given a starting point
 void write_char(int ascii, int startx, int starty, int *image_mask, int font_size){
 
 	int start = maxw + 1 + ((ascii-32) % 18)*(width+gap) + (maxw * (height+gap) * ((ascii-32) / 18));
@@ -49,17 +55,12 @@ void write_char(int ascii, int startx, int starty, int *image_mask, int font_siz
 		}
 	}
 
-	// Copy the modified temp buffer back to image_pointer
-	//memcpy(image_buffer_pointer, temp_buffer, NUM_BYTES_BUFFER);
-	//displayImage(temp_buffer);
-
 }
 
+//Writes an input string onto a base mask given a starting point
 void write_string(char *c, int startx, int starty, int *base_mask, int *image_mask, int font_size){
 
 	memcpy(image_mask, base_mask, NUM_BYTES_BUFFER);
-
-	//chooseFontColour(strlen(c)-1, startx, starty, base_mask, font_size);
 
 	int i = 0;
 	while(c[i] != '\0'){
@@ -68,12 +69,14 @@ void write_string(char *c, int startx, int starty, int *base_mask, int *image_ma
 	}
 }
 
+//Displays the image onto the image_buffer_pointer while avoiding tear
 void displayImage(int * image_mask) {
 	memcpy(image_buffer_pointer, image_mask, NUM_BYTES_BUFFER);
 	usleep(100);
 	memcpy(image_buffer_pointer, image_mask, NUM_BYTES_BUFFER);
 }
 
+//Displays the time onto the base_mask
 void displayTime(int *base_mask, int *image_mask) {
 	localTimeData ct = get_clock();
 	char timeChar[9];
@@ -82,6 +85,7 @@ void displayTime(int *base_mask, int *image_mask) {
 	write_string(timeChar, 50, 70, base_mask, image_mask, 10);
 }
 
+//Displays all weather information and the location
 void displayWeather(int *base_mask, int *image_mask) {
 
 	char humMessage[20];
@@ -129,11 +133,10 @@ void displayWeather(int *base_mask, int *image_mask) {
 	}
 }
 
+//displays the correct weather icon depending on the fetched weather
 void weatherIcon(int startx, int starty, int *base_mask, int *image_mask) {
 
 	int iconSize = 100;
-	//int HGap = 75;
-	//int VGap = 80;
 	int font_size = 2;
 	int weatherw = 800;
 
@@ -149,10 +152,9 @@ void weatherIcon(int startx, int starty, int *base_mask, int *image_mask) {
 			}
 		}
 	}
-
-	//displayImage(temp_buffer);
 }
 
+//Displays the date on a given base_mask
 void displayDate(int *base_mask, int *image_mask) {
 
 	memcpy(temp_buffer, base_mask, NUM_BYTES_BUFFER);
@@ -228,8 +230,6 @@ void displayMusic(int *base_mask, int *image_mask) {
 		strcpy(shuffleStr, "Shuffle Off");
 	}
 
-	//memcpy(temp_buffer, base_mask, NUM_BYTES_BUFFER);
-
 	//chooseFontColour(800, 920, base_mask);
 	write_string(songName, 790, 920, base_mask, temp_buffer, 4);
 	write_string(songArtist, 790, 950, temp_buffer, temp_buffer, 3);
@@ -262,13 +262,8 @@ void chooseFontColour(int startx, int starty, int *base_mask) {
 	float lum2 = 0.2126 * ((float)r2 / 255) + 0.7152 * ((float)g2 / 255) + 0.0722 * ((float)b2 / 255);
 	float lum3 = 0.2126 * ((float)r3 / 255) + 0.7152 * ((float)g3 / 255) + 0.0722 * ((float)b3 / 255);
 
-	//xil_printf("lum1 = %d.%03d\n", (int)lum1, (int)((lum1 - (int)lum1) * 1000));
-	//xil_printf("lum2 = %d.%03d\n", (int)lum2, (int)((lum2 - (int)lum2) * 1000));
-	//xil_printf("lum3 = %d.%03d\n", (int)lum3, (int)((lum3 - (int)lum3) * 1000));
-
 	if (((lum1 > 0.5) + (lum2 > 0.5) + (lum3 > 0.5)) >= 1) {
 		//xil_printf("dark gray\n");
-		//font_colour = 0xFF333333;
 		font_colour = 0xFF1E1E1E;
 	}
 	else {
@@ -277,6 +272,7 @@ void chooseFontColour(int startx, int starty, int *base_mask) {
 	}
 }
 
+//Displays "Repeat Once" "Repeat" or nothing depending on the music mode
 void getMusicModeStr(char * charValue, int value){
 	switch(value){
 	case 1:

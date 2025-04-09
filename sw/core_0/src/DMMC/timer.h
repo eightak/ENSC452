@@ -1,3 +1,11 @@
+/*
+ * TIMER.H
+ *
+ * Initialization and maintenance of the timer mode
+ * Manages controls (button presses) inside timer mode
+ *
+ */
+
 #ifndef __TIMER_H_
 #define __TIMER_H_
 

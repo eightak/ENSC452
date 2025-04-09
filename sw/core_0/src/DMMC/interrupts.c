@@ -1,3 +1,10 @@
+/*
+ * INTERRUPTS.C
+ *
+ * Sets up button and switch interrupts
+ * features a sw implementation of the button debouncer using sleep
+ * based on interrupts on the video and audio tutorial
+ */
 
 #include "interrupts.h"
 
@@ -51,8 +58,7 @@ void Btn_InterruptHandler(void *InstancePtr)
 		//xil_printf("switch rising edge\n");
 	}
 
-	//if ((prev_sw_value > 0) && (sw_value == 0)) { //falling edge
-	if (prev_sw_value > sw_value) {
+	if (prev_sw_value > sw_value) { //falling edge
 		switch_falling_edge = 1;
 		//xil_printf("switch falling edge\n");
 	}

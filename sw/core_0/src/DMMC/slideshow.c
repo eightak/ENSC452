@@ -1,3 +1,10 @@
+/*
+ * SLIDESHOW.H
+ *
+ * Initialization and maintenance of the slideshow mode
+ * features the random number generator which is also used in music.h
+ */
+
 #include "slideshow.h"
 
 localTimeData startTime;
@@ -7,6 +14,7 @@ static int switch_time = 5; //switch image every 5 seconds
 
 int slideshow_len = 4;
 
+//two extra memory spaces for inserting images from ethernet
 int * slideshow_images[MAX_SS_LEN] = {
 	(int *)0x5A90000,
 	(int *)0x5FF0000,
@@ -22,9 +30,10 @@ void slideshow_init() {
 	}
 }
 
-
 void slideshow(int button_pressed_flag_ss) {
 
+	//If a user enters a number between 1 to 10,
+	//Changes the transition length between images
 	if (processingDone && (tempbuf[0] != '\0')) {
 		if (((int)tempbuf[0]-48 >= 1) && ((int)tempbuf[0]-48 <= 10)) {
 			switch_time = (int)tempbuf[0]-48;
@@ -43,25 +52,17 @@ void slideshow(int button_pressed_flag_ss) {
 		startTime = get_clock();
 		ss_secs = 0;
 		sw0_rising_edge = 0;
-		//memcpy(image_buffer, (void *)slideshow_images[0], NUM_BYTES_BUFFER);
-		//displayImage((void *)slideshow_images[0]);
 		memcpy(curr_image_ptr, slideshow_shuffled[0], NUM_BYTES_BUFFER);
 		displayImage((void *)slideshow_shuffled[0]);
 	}
 
 	if (ss_secs == elapsed_time(startTime)) {
-		//xil_printf("ss_secs: %d\n", ss_secs);
-		//xil_printf("switch_time: %d\n", switch_time);
-		//xil_printf("index: %d\n", ss_secs % switch_time);
 		if (ss_secs % switch_time == 0) {
 			xil_printf("next image\n");
-			//chooseFontColour(50, 50, slideshow_images[img_num % slideshow_len]);
-			//memcpy(curr_image_ptr, slideshow_images[img_num % slideshow_len], NUM_BYTES_BUFFER);
 
 			chooseFontColour(50, 50, slideshow_shuffled[img_num % slideshow_len]);
 			memcpy(curr_image_ptr, slideshow_shuffled[img_num % slideshow_len], NUM_BYTES_BUFFER);
 
-			//displayImage((void *)slideshow_images[img_num % slideshow_len]);
 			displayTime(curr_image_ptr, time_image_ptr);
 			displayImage(time_image_ptr);
 

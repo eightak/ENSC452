@@ -1,9 +1,13 @@
+/*
+ * HOME.C
+ *
+ * Features Uart processing inside the homescreen, as well as basic initializations
+ */
+
 #include "home.h"
 
 void home_screen(){
 
-	//memcpy(image_buffer_pointer, centre_image_ptr, NUM_BYTES_BUFFER);
-	//displayImage(centre_image_ptr);
 	if (strcmp(weather.country, "GB") == 0) {
 		displayWeather(london_image_ptr, curr_image_ptr);
 	}
@@ -19,20 +23,13 @@ void home_screen(){
 	displayImage(time_image_ptr);
 	showTimeFlag = 1;
 
-	//if (XGpio_DiscreteRead(&BTNInst, 1) == 1){
-		//getUart();
-		//xil_printf("idx: %d\n", idx);
-
-		//if (processingDone && (tempbuf[0] != '\0')) {
 		if (processingDone && (tempbuf[0] != '\0')) {
 			char UartMessage[20] = "Message From Uart:";
 			chooseFontColour(50, 900, curr_image_ptr);
 
 			//xil_printf("Printing on screen => %s\n", (char*)tempbuf);
-			//memcpy(centre_image_ptr_temp, centre_image_ptr, NUM_BYTES_BUFFER);
 			write_string(UartMessage, 50, 900, curr_image_ptr, curr_image_ptr, 5);
 			write_string((char*)tempbuf, 50, 950, curr_image_ptr, curr_image_ptr, 5);
-			//button_pressed_flag = 0;
 
 			//reset uart after processing
 			reset_tempbuf();

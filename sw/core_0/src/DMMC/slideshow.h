@@ -1,3 +1,10 @@
+/*
+ * SLIDESHOW.C
+ *
+ * Initialization and maintenance of the slideshow mode
+ * features the random number generator which is also used in music.h
+ */
+
 #ifndef __SLIDESHOW_H_
 #define __SLIDESHOW_H_
 

@@ -1,4 +1,4 @@
-09:33:16 **** Incremental Build of configuration Debug for project core_0 ****
+17:59:42 **** Incremental Build of configuration Debug for project core_0 ****
 make all 
 make --no-print-directory pre-build
 a9-linaro-pre-build-step
@@ -9,14 +9,58 @@ make --no-print-directory main-build
 arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/dmmc.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/dmmc.d" -MT"src/DMMC/dmmc.o" -o "src/DMMC/dmmc.o" "../src/DMMC/dmmc.c"
 'Finished building: ../src/DMMC/dmmc.c'
 ' '
+'Building file: ../src/DMMC/home.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/home.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/home.d" -MT"src/DMMC/home.o" -o "src/DMMC/home.o" "../src/DMMC/home.c"
+'Finished building: ../src/DMMC/home.c'
+' '
 'Building file: ../src/DMMC/music.c'
 'Invoking: ARM v7 gcc compiler'
 arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/music.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/music.d" -MT"src/DMMC/music.o" -o "src/DMMC/music.o" "../src/DMMC/music.c"
 ../src/DMMC/music.c: In function 'music':
-../src/DMMC/music.c:11:15: warning: operation on 'music_mode' may be undefined [-Wsequence-point]
-   11 |    music_mode = ++music_mode;
+../src/DMMC/music.c:16:15: warning: operation on 'music_mode' may be undefined [-Wsequence-point]
+   16 |    music_mode = ++music_mode;
       |    ~~~~~~~~~~~^~~~~~~~~~~~~~
 'Finished building: ../src/DMMC/music.c'
+' '
+'Building file: ../src/DMMC/slideshow.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/slideshow.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/slideshow.d" -MT"src/DMMC/slideshow.o" -o "src/DMMC/slideshow.o" "../src/DMMC/slideshow.c"
+'Finished building: ../src/DMMC/slideshow.c'
+' '
+'Building file: ../src/DMMC/stopwatch.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/stopwatch.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/stopwatch.d" -MT"src/DMMC/stopwatch.o" -o "src/DMMC/stopwatch.o" "../src/DMMC/stopwatch.c"
+'Finished building: ../src/DMMC/stopwatch.c'
+' '
+'Building file: ../src/DMMC/timer.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/timer.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/timer.d" -MT"src/DMMC/timer.o" -o "src/DMMC/timer.o" "../src/DMMC/timer.c"
+'Finished building: ../src/DMMC/timer.c'
+' '
+'Building file: ../src/DMMC/uart_func.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/DMMC/uart_func.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/DMMC/uart_func.d" -MT"src/DMMC/uart_func.o" -o "src/DMMC/uart_func.o" "../src/DMMC/uart_func.c"
+'Finished building: ../src/DMMC/uart_func.c'
+' '
+'Building file: ../src/data_reception.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/data_reception.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/data_reception.d" -MT"src/data_reception.o" -o "src/data_reception.o" "../src/data_reception.c"
+../src/data_reception.c: In function 'receive_reception':
+../src/data_reception.c:80:18: warning: operation on 'insert_ss_idx' may be undefined [-Wsequence-point]
+   80 |    insert_ss_idx = ++insert_ss_idx;
+      |    ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+'Finished building: ../src/data_reception.c'
+' '
+'Building file: ../src/echo.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/echo.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/echo.d" -MT"src/echo.o" -o "src/echo.o" "../src/echo.c"
+'Finished building: ../src/echo.c'
+' '
+'Building file: ../src/main.c'
+'Invoking: ARM v7 gcc compiler'
+arm-none-eabi-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/main.o" -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -IC:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/sw/dmm_design_wrapper/standalone_ps7_cortexa9_0/bspinclude/include -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+'Finished building: ../src/main.c'
 ' '
 'Building target: core_0.elf'
 'Invoking: ARM v7 gcc linker'
@@ -26,9 +70,9 @@ arm-none-eabi-gcc -mcpu=cortex-a9 -mfpu=vfpv3 -mfloat-abi=hard -Wl,-build-id=non
 'Invoking: ARM v7 Print Size'
 arm-none-eabi-size core_0.elf  |tee "core_0.elf.size"
    text	   data	    bss	    dec	    hex	filename
- 153620	   3580	5363760	5520960	 543e40	core_0.elf
+ 153556	   3580	5363760	5520896	 543e00	core_0.elf
 'Finished building: core_0.elf.size'
 ' '
 
-09:33:18 Build Finished (took 2s.152ms)
+17:59:49 Build Finished (took 6s.309ms)
 

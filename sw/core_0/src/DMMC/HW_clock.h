@@ -1,8 +1,11 @@
+/*
+ * Functions that get and set the time from the global_clk hardware block
+ */
+
 #ifndef __HW_CLOCK_H_
 #define __HW_CLOCK_H_
 
 #include <stdio.h>
-//#include <string.h>
 #include "global_clk.h"
 #include "xil_printf.h"
 

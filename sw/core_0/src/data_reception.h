@@ -1,3 +1,9 @@
+/*
+ * DATA_RECEPTION.H
+ *
+ * FSM for data reception from host PC via ethernet
+ */
+
 #ifndef __DATA_RECEPTION_H_
 #define __DATA_RECEPTION_H_
 
@@ -17,36 +23,11 @@
 #define BUF_SIZE   100
 #define IMAGE_SIZE 1024*1280*4
 
-//MOVED TO display.h
-/*
-typedef struct {
-	float temp;
-	int hum;
-	char condition[15];
-	char tempstr[5];
-} weatherData;
-*/
-
-//MOVED TO HW_clock.h
-/*
-typedef struct {
-	uint16_t year;
-	uint8_t month;
-	uint8_t day;
-	uint8_t hour;
-	uint8_t min;
-	uint8_t sec;
-} localTimeData;
-*/
-
 int fsm_state;
 
 char reception[BUF_SIZE];
 char fsm1[BUF_SIZE];
-//char fsm2[BUF_SIZE];
 
-//weatherData weather;
-//localTimeData localTime;
 extern int * ethernet_image_ptr;
 extern uint8_t * ethernet_image_uint8;
 int pixelsProcessed;

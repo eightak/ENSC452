@@ -1,4 +1,12 @@
 /*
+ * MAIN.C
+ *
+ * Modified from main.c from the LWIP Echo Server template
+ * Calls the DMMC main loop
+ * after establishing ethernet connection
+ */
+
+/*
  * Copyright (C) 2009 - 2019 Xilinx, Inc.
  * All rights reserved.
  *
@@ -26,7 +34,6 @@
  *
  */
 #include "DMMC/dmmc.h"
-//#include "DMMC/testMain.h"
 
 #include <stdio.h>
 
