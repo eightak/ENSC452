@@ -1,8 +1,9 @@
 /*
  * DMMC.H
  *
- * This is the psuedo main loop for the smart display logic.
- * Used in main.c after establishing Ethernet connection
+ * This is the pseudo main loop for the smart display logic.
+ * Functions Setup() and MainLoop() are called to initialize and maintain 
+ * the smart display logic in main.c
  */
 
 #ifndef __DMMC_H_

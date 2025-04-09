@@ -1,0 +1,75 @@
+#include "music.h"
+
+void music() {
+	if (button_pressed_flag) {
+		switch(btn_value) {
+		case (CENTRE_BUTTON):
+			;
+			int music_mode = getMusicMode_sharedMemory();;
+			//music_mode =
+			music_mode = ++music_mode;
+			music_mode = music_mode % NUM_MUSIC_MODE;
+
+			setMusicMode_sharedMemory(music_mode);
+			break;
+		case (UP_BUTTON): //Increase Volume
+			setVolumeControlFlag_sharedMemory(1);
+			break;
+		case (DOWN_BUTTON): //Decrease Volume
+			setVolumeControlFlag_sharedMemory(2);
+			break;
+		case (RIGHT_BUTTON): //Next Track
+			setTrackControl_sharedMemory(1);
+			break;
+		case (LEFT_BUTTON): //Previous Track
+			setTrackControl_sharedMemory(2);
+			break;
+		}
+	}
+}
+
+void shuffleMusicArray(MusicStruct * ms) {
+	xil_printf("Shuffling...\n");
+    for (int i = NUM_MUSIC_TRACKS - 1; i > 0; i--) {
+        int j = random_number() % (i + 1); // Get a random index within bounds
+        //xil_printf("Random Number => %d\n", j);
+        // Swap arr[i] and arr[j]
+
+        // save to temp
+        int * tempAddr = ms->musicAddr[i];
+        char tempName[CHAR_SIZE];
+        char tempArtist[CHAR_SIZE];
+        int tempSamples = ms->musicSamples[i];
+
+        strcpy(tempName, ms->musicName[i]);
+        strcpy(tempArtist, ms->musicArtist[i]);
+
+        // replace i with j
+        ms->musicAddr[i] = ms->musicAddr[j];
+        strcpy(ms->musicName[i], ms->musicName[j]);
+        strcpy(ms->musicArtist[i], ms->musicArtist[j]);
+        ms->musicSamples[i] = ms->musicSamples[j];
+
+        // replace j with temp
+        ms->musicAddr[j] = tempAddr;
+        strcpy(ms->musicName[j], tempName);
+        strcpy(ms->musicArtist[j], tempArtist);
+        ms->musicSamples[j] = tempSamples;
+
+    }
+    for (int i = 0; i < NUM_MUSIC_TRACKS; i++) {
+    	xil_printf("Shuffled => %s\n", ms->musicName[i]);
+    }
+}
+
+void revertMusicToOriginalQueue(MusicStruct_OG * ms_og, MusicStruct * ms){
+	for(int i = 0; i < NUM_MUSIC_TRACKS; i++){
+		ms->musicAddr[i] = ms_og->musicAddr[i];
+		strcpy(ms->musicName[i], ms_og->musicName[i]);
+		strcpy(ms->musicArtist[i], ms_og->musicArtist[i]);
+		ms->musicSamples[i] = ms_og->musicSamples[i];
+
+	}
+	Xil_DCacheFlushRange((INTPTR)MUSIC_ARRAY, sizeof(MusicStruct));
+
+}

@@ -1,7 +1,7 @@
 /*
  * SHARED_MEM.H
  *
- * setters and getters for communication between cores
+ * Setters and getters for communication between cores
  */
 
 #ifndef SHARED_MEM_H

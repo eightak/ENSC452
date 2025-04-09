@@ -1,3 +1,10 @@
+/*
+ * UTIL.H
+ *
+ * Contains logic and helper functions that are used throughout the core 1 source code
+ */
+
+
 #ifndef UTIL_H
 #define UTIL_H
 

@@ -1,3 +1,10 @@
+/*
+ * MAIN.C
+ *
+ * Contains logic for the setup and the main loop for the core 1 of the project.
+ * Core 1 is responsible for audio processing and outputs
+ */
+
 
 #include <stdio.h>
 #include <string.h>

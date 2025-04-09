@@ -1,0 +1,78 @@
+#include "slideshow.h"
+
+localTimeData startTime;
+static int img_num = 0;
+static int ss_secs = 0;
+static int switch_time = 5; //switch image every 5 seconds
+
+int slideshow_len = 4;
+
+int * slideshow_images[MAX_SS_LEN] = {
+	(int *)0x5A90000,
+	(int *)0x5FF0000,
+	(int *)0x65F0000,
+	(int *)0x6BF0000,
+	(int *)0x71F0000,
+	(int *)0x77F0000
+};
+
+void slideshow_init() {
+	for (int i = 0; i < MAX_SS_LEN; i++) {
+		slideshow_shuffled[i] = slideshow_images[i];
+	}
+}
+
+
+void slideshow(int button_pressed_flag_ss) {
+
+	if (processingDone && (tempbuf[0] != '\0')) {
+		if (((int)tempbuf[0]-48 >= 1) && ((int)tempbuf[0]-48 <= 10)) {
+			switch_time = (int)tempbuf[0]-48;
+			//xil_printf("slideshow length: %d\n", switch_time);
+		}
+		reset_tempbuf();
+	}
+
+	if (button_pressed_flag_ss && btn_value == LEFT_BUTTON) {
+		xil_printf("shuffling slideshow\n");
+		shuffleSlideshow();
+	}
+
+	if (sw0_rising_edge) {
+		xil_printf("Starting slideshow...\n");
+		startTime = get_clock();
+		ss_secs = 0;
+		sw0_rising_edge = 0;
+		memcpy(curr_image_ptr, slideshow_shuffled[0], NUM_BYTES_BUFFER);
+		displayImage((void *)slideshow_shuffled[0]);
+	}
+
+	if (ss_secs == elapsed_time(startTime)) {
+		if (ss_secs % switch_time == 0) {
+			xil_printf("next image\n");
+
+			chooseFontColour(50, 50, slideshow_shuffled[img_num % slideshow_len]);
+			memcpy(curr_image_ptr, slideshow_shuffled[img_num % slideshow_len], NUM_BYTES_BUFFER);
+
+			displayTime(curr_image_ptr, time_image_ptr);
+			displayImage(time_image_ptr);
+
+			img_num++;
+		}
+		ss_secs++;
+	}
+}
+
+int random_number() {
+    return (RANDOM_NUM_GEN_IP_mReadReg(RAND_NUM_BASE, 0) % 511) + 1;  // Returns a random number between 1 and 511
+}
+
+void shuffleSlideshow() {
+	for (int i = slideshow_len - 1; i > 0; i--) {
+		int j = random_number() % (i+1);
+		//swap
+		int * tempPtr = slideshow_shuffled[i];
+		slideshow_shuffled[i] = slideshow_shuffled[j];
+		slideshow_shuffled[j] = tempPtr;
+	}
+}

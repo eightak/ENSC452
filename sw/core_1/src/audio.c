@@ -1,8 +1,8 @@
 /*
- * audio.c
+ * AUDIO.C
  *
- *  Contains all of the functions related to audio codec initlizations.
- * 	Contains all the funtions to play music and sounds
+ * Contains all of the functions related to audio codec initializations.
+ * Contains all the functions to play music and sounds
  */
 
 #include "audio.h"

@@ -1,3 +1,9 @@
+/*
+ * UTIL.C
+ *
+ * Contains logic and helper functions that are used throughout the core 1 source code
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "xparameters.h"

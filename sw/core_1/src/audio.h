@@ -1,3 +1,11 @@
+/*
+ * AUDIO.H
+ *
+ * Contains all of the functions related to audio codec initializations.
+ * Contains all the functions to play music and sounds
+ */
+
+
 #ifndef __AUDIO_H_
 #define __AUDIO_H_
 
