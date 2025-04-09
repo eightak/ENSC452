@@ -9236,3 +9236,48 @@ con
 
 18:08:44 INFO  : Launch script is exported to file 'C:\Users\eitak\Desktop\Github\ENSC452\sw\DMMC_system\_ide\scripts\systemdebugger_dmmc_system_standalone.tcl'
 18:29:22 INFO  : Disconnected from the channel tcfchan#3.
+20:38:40 INFO  : Launching XSCT server: xsct.bat -n  -interactive C:\Users\eitak\Desktop\Github\ENSC452\sw\temp_xsdb_launch_script.tcl
+20:38:43 INFO  : XSCT server has started successfully.
+20:38:43 INFO  : Successfully done setting XSCT server connection channel  
+20:38:43 INFO  : plnx-install-location is set to ''
+20:38:43 INFO  : Successfully done setting workspace for the tool. 
+20:38:49 INFO  : Platform repository initialization has completed.
+20:38:50 INFO  : Successfully done query RDI_DATADIR 
+20:38:50 INFO  : Registering command handlers for Vitis TCF services
+20:38:56 INFO  : Checking for BSP changes to sync application flags for project 'core_1'...
+20:39:05 INFO  : Checking for BSP changes to sync application flags for project 'core_0'...
+20:39:18 ERROR : (XSDB Server)ERROR: [Hsi 55-1571] The design file C:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/hw/dmm_design_wrapper.xsa is already opened
+
+20:41:03 ERROR : (XSDB Server)In file included from ../../../include/xemacps.h:328,
+                 from ../../../include/netif/xemacpsif.h:56,
+                 from contrib/ports/xilinx/netif/xemacpsif_dma.c:37:
+contrib/ports/xilinx/netif/xemacpsif_dma.c: In function 'init_dma':
+
+20:41:03 ERROR : (XSDB Server)../../../include/xemacps_hw.h:593:23: warning: 'bdrxterminate' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  593 | #define XEmacPs_Out32 Xil_Out32
+      |                       ^~~~~~~~~
+contrib/ports/xilinx/netif/xemacpsif_dma.c:568:14: note: 'bdrxterminate' was declared here
+  568 |  XEmacPs_Bd *bdrxterminate;
+      |              ^~~~~~~~~~~~~
+In file included from ../../../include/xemacps.h:329,
+                 from ../../../include/netif/xemacpsif.h:56,
+                 from contrib/ports/xilinx/netif/xemacpsif_dma.c:37:
+../../../include/xemacps_bd.h:120:12: warning: 'bdtxterminate' may be used uninitialized in this function [-Wmaybe-uninitialized]
+  120 |  (*(u32 *)((UINTPTR)((void*)(BaseAddress)) + (u32)(Offset)))
+      |            ^
+contrib/ports/xilinx/netif/xemacpsif_dma.c:567:14: note: 'bdtxterminate' was declared here
+  567 |  XEmacPs_Bd *bdtxterminate;
+      |              ^~~~~~~~~~~~~
+
+20:41:04 ERROR : (XSDB Server)random_num_gen_ip_selftest.c: In function 'RANDOM_NUM_GEN_IP_Reg_SelfTest':
+
+20:41:04 ERROR : (XSDB Server)random_num_gen_ip_selftest.c:52:66: warning: comparison of integer expressions of different signedness: 'u32' {aka 'long unsigned int'} and 'int' [-Wsign-compare]
+   52 |    if ( RANDOM_NUM_GEN_IP_mReadReg (baseaddr, read_loop_index*4) != (read_loop_index+1)*READ_WRITE_MUL_FACTOR){
+      |                                                                  ^~
+random_num_gen_ip_selftest.c:36:6: warning: unused variable 'Index' [-Wunused-variable]
+   36 |  int Index;
+      |      ^~~~~
+
+20:41:27 INFO  : Result from executing command 'getProjects': dmm_design_wrapper
+20:41:37 INFO  : Result from executing command 'getPlatforms': dmm_design_wrapper|C:/Users/eitak/Desktop/Github/ENSC452/sw/dmm_design_wrapper/export/dmm_design_wrapper/dmm_design_wrapper.xpfm;dmm_design_wrapper|C:/Users/eitak/ENSC452/DMMC/dmm_design_wrapper/export/dmm_design_wrapper/dmm_design_wrapper.xpfm
+20:41:37 ERROR : Error from executing command 'addPlatformRepo': ERROR: No valid directory exists at given path.
